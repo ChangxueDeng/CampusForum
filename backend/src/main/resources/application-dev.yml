@@ -1,0 +1,31 @@
+server:
+  port: 8081
+spring:
+  security:
+    filter:
+      order: -100
+    jwt:
+      key: "2024"
+      exprire: 1
+  datasource:
+    url: jdbc:mysql://192.168.137.129:3306/campus_forum
+    username: root
+    password: 5211
+  data:
+    redis:
+      host: 192.168.137.129
+      port: 6379
+      database: 0
+  mail:
+    # 163邮箱的地址为smtp.163.com，直接填写即可
+    host: smtp.163.com
+    # 你申请的163邮箱
+    username: 19989150208@163.com
+    # 注意密码是在开启smtp/pop3时自动生成的，记得保存一下，不然就找不到了
+    password: ACVPKFIIEZSOKYHA
+  rabbitmq:
+    port: 5672
+    host: 192.168.137.129
+    virtual-host: /
+    username: admin
+    password: admin
