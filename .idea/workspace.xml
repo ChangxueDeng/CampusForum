@@ -1,41 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="GROUP_BY_SEVERITY" value="true" />
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="753f4c1c-ea0b-4c49-a6a5-1d2093d51c00" name="更改" comment="项目创建">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/logback-spring.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/assets/app.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/welcome/ForgetPage.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/welcome/LoginPage.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/welcome/RegisterPage.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/net/net.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/router/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/views/IndexPage.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/views/WelcomePage.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/log/2024-03-06-spring-0.log" afterDir="false" />
+    <list default="true" id="753f4c1c-ea0b-4c49-a6a5-1d2093d51c00" name="更改" comment="登陆前端实现">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/log/2024-03-08-spring-0.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/log/2024-03-11-spring-0.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/config/RabbitmqConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/config/SecurityConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/config/SwaggerConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/config/WebConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/controller/AuthorizeController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/entity/Account.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/entity/Result.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/entity/dto/AccountDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/entity/vo/response/AuthorizeVO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/filter/DoCorsFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/filter/JwtFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/listenter/RabbitmqListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/mapper/AccountMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/service/AccountService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/service/impl/AccountServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/utils/Const.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/utils/FlowUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/utils/JwtUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/utils/SnowflakeIdGenerator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/org/campusforum/backend/utils/StatusUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/e196c600-4da8-423e-92ad-fbc652221917.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/e196c600-4da8-423e-92ad-fbc652221917.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/HelloWorld.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/TheWelcome.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/WelcomeItem.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/icons/IconCommunity.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/icons/IconDocumentation.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/icons/IconEcosystem.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/icons/IconSupport.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/icons/IconTooling.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application-dev.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application-dev.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/org/campusforum/backend/BackendApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/org/campusforum/backend/BackendApplicationTests.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,11 +49,19 @@
       <list>
         <option value="Vue Composition API Component" />
         <option value="JavaScript File" />
+        <option value="Enum" />
+        <option value="Interface" />
+        <option value="Record" />
+        <option value="Class" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-config/6.2.2/spring-security-config-6.2.2.jar!/org/springframework/security/config/annotation/web/configurers/ExceptionHandlingConfigurer.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$MAVEN_REPOSITORY$/org/springframework/security/spring-security-web/6.2.2/spring-security-web-6.2.2.jar!/org/springframework/security/web/access/AccessDeniedHandler.class" root0="SKIP_INSPECTION" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -78,6 +88,8 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
+    "JUnit.BackendApplicationTests.contextLoads.executor": "Run",
+    "JUnit.BackendApplicationTests.executor": "Run",
     "RequestMappingsPanelOrder0": "0",
     "RequestMappingsPanelOrder1": "1",
     "RequestMappingsPanelWidth0": "75",
@@ -101,7 +113,8 @@
     "project.structure.last.edited": "模块",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "http.proxy",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
     "ts.external.directory.path": "C:\\Users\\ChangxueDeng\\Software\\IntelliJ IDEA 2023.2.4\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   },
@@ -123,7 +136,38 @@
       <recent name="C:\Users\ChangxueDeng\Code\Java\Projects\CampusForum\backend\src\main\resources" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.dev">
+  <component name="RunManager" selected="Spring Boot.BackendApplication">
+    <configuration name="BackendApplicationTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="backend" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.campusforum.backend.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.campusforum.backend" />
+      <option name="MAIN_CLASS_NAME" value="org.campusforum.backend.BackendApplicationTests" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="BackendApplicationTests.contextLoads" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="backend" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.campusforum.backend.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.campusforum.backend" />
+      <option name="MAIN_CLASS_NAME" value="org.campusforum.backend.BackendApplicationTests" />
+      <option name="METHOD_NAME" value="contextLoads" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Debug Application" type="JavascriptDebugType" uri="http://localhost:5173">
       <method v="2" />
     </configuration>
@@ -146,9 +190,17 @@
     </configuration>
     <list>
       <item itemvalue="JavaScript 调试.Debug Application" />
+      <item itemvalue="JUnit.BackendApplicationTests" />
+      <item itemvalue="JUnit.BackendApplicationTests.contextLoads" />
       <item itemvalue="npm.dev" />
       <item itemvalue="Spring Boot.BackendApplication" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.BackendApplicationTests.contextLoads" />
+        <item itemvalue="JUnit.BackendApplicationTests" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -170,7 +222,17 @@
       <workItem from="1709720106802" duration="1531000" />
       <workItem from="1709726414328" duration="1215000" />
       <workItem from="1709730652253" duration="364000" />
-      <workItem from="1709771784289" duration="5069000" />
+      <workItem from="1709771784289" duration="5646000" />
+      <workItem from="1709794012036" duration="4434000" />
+      <workItem from="1709804140906" duration="4932000" />
+      <workItem from="1709891126412" duration="291000" />
+      <workItem from="1709891427058" duration="12274000" />
+      <workItem from="1709906108019" duration="107000" />
+      <workItem from="1709981949830" duration="1768000" />
+      <workItem from="1710124835716" duration="5040000" />
+      <workItem from="1710139123068" duration="4601000" />
+      <workItem from="1710145230629" duration="8102000" />
+      <workItem from="1710162153405" duration="3388000" />
     </task>
     <task id="LOCAL-00001" summary="项目创建">
       <option name="closed" value="true" />
@@ -180,7 +242,15 @@
       <option name="project" value="LOCAL" />
       <updated>1709471314222</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="登陆前端实现">
+      <option name="closed" value="true" />
+      <created>1709777242736</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1709777242736</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -189,7 +259,8 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="项目创建" />
-    <option name="LAST_COMMIT_MESSAGE" value="项目创建" />
+    <MESSAGE value="登陆前端实现" />
+    <option name="LAST_COMMIT_MESSAGE" value="登陆前端实现" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
