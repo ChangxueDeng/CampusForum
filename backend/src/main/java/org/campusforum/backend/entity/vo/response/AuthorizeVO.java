@@ -1,6 +1,8 @@
 package org.campusforum.backend.entity.vo.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -9,6 +11,8 @@ import java.util.Date;
  * @author ChangxueDeng
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AuthorizeVO {
     private String username;
     private String role;

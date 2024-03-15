@@ -86,9 +86,9 @@ const userRegister = ()=>{
 
 const validateEmail = ()=>{
   coldTime.value = 60;
-  post(`api/auth/ask-code?email=${form.email}&type=register`,{
-  }, ()=>{
-    ElMessage.success('发送验证码成功，请注意查收')
+  post(`api/auth/ask-code?email=${form.email}&type=register`,
+      {}, ()=>{
+    ElMessage.success("发送验证码成功，请注意查收")
     setInterval(()=> coldTime.value--, 1000)
   }, (message)=>{
     ElMessage.warning(message)

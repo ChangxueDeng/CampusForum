@@ -1,10 +1,13 @@
 package org.campusforum.backend.entity;
 
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -13,10 +16,12 @@ import java.util.Date;
  * @author ChangxueDeng
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @TableName(value = "account")
 public class Account {
 
-    @TableId
+    @TableId(type = IdType.AUTO)
     private Integer id;
     @TableField
     private String username;

@@ -1,5 +1,8 @@
 server:
   port: 8081
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 spring:
   security:
     filter:

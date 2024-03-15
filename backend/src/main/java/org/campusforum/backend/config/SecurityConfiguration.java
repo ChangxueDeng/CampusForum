@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.campusforum.backend.entity.Result;
 import org.campusforum.backend.entity.dto.AccountDTO;
 import org.campusforum.backend.entity.vo.response.AuthorizeVO;
+import org.campusforum.backend.filter.JwtFilter;
+import org.campusforum.backend.filter.LogRequestFilter;
 import org.campusforum.backend.service.AccountService;
 import org.campusforum.backend.utils.Const;
 import org.campusforum.backend.utils.JwtUtils;
@@ -28,6 +30,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import java.io.IOException;
@@ -46,6 +49,10 @@ public class SecurityConfiguration {
 
     @Resource
     JwtUtils jwtUtils;
+    @Resource
+    JwtFilter jwtFilter;
+    @Resource
+    LogRequestFilter logRequestFilter;
 
 
     /**
@@ -84,6 +91,7 @@ public class SecurityConfiguration {
                         @Override
                         public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
                             response.setCharacterEncoding("UTF-8");
+                            response.setContentType("application/json");
                             response.getWriter().write(Result.failure(StatusUtils.STATUS_FORBIDDEN, StatusUtils.MESSAGE_FAILURE_FORBIDDEN).toJsonString());
 
                         }
@@ -93,10 +101,14 @@ public class SecurityConfiguration {
                         @Override
                         public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
                             response.setCharacterEncoding("UTF-8");
+                            response.setContentType("application/json");
                             response.getWriter().write(Result.failure(StatusUtils.STATUS_UNAUTHORIZED, StatusUtils.MESSAGE_FAILURE_UNAUTHORIZED).toJsonString());
                         }
                     });
                 })
+                //添加过滤器
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(logRequestFilter, JwtFilter.class)
                 .build();
     }
 
@@ -106,6 +118,7 @@ public class SecurityConfiguration {
             public void onAuthenticationSuccess(HttpServletRequest request,
                                                 HttpServletResponse response,
                                                 Authentication authentication) throws IOException, ServletException {
+                response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
                 AccountDTO accountDTO = accountServiceImpl.coverDTO(accountServiceImpl.findAccountByUsernameOrEmail(user.getUsername()));
@@ -126,6 +139,7 @@ public class SecurityConfiguration {
             public void onAuthenticationFailure(HttpServletRequest request,
                                                 HttpServletResponse response,
                                                 AuthenticationException exception) throws IOException, ServletException {
+                response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getWriter().write(Result.
                         failure(StatusUtils.STATUS_BAD_REQUEST, "登陆失败，用户名或密码存在错误").toJsonString());
@@ -136,6 +150,7 @@ public class SecurityConfiguration {
         return new LogoutSuccessHandler() {
             @Override
             public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 //获取token
                 String token = request.getHeader(Const.HEAD_TOKEN);

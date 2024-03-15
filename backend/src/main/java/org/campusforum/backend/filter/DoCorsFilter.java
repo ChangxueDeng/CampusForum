@@ -30,6 +30,6 @@ public class DoCorsFilter extends HttpFilter {
         //允许发起跨域请求的方法
         response.addHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");
         //允许跨域请求提交哪些 Header
-        response.addHeader("Access-Control-Request-Headers", "Context-Type, Authorization");
+        response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     }
 }

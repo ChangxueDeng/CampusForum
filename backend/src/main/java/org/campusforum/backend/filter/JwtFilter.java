@@ -29,9 +29,11 @@ public class JwtFilter extends OncePerRequestFilter {
         String headToken = request.getHeader(Const.HEAD_TOKEN);
         if (headToken != null) {
             //进行jwt校验
-            DecodedJWT decodedJWT = jwtUtils.decodedJwtToken(headToken);
+            DecodedJWT decodedJwt = jwtUtils.decodedJwtToken(headToken);
             //将token内容转换为User
-            User user = (User) jwtUtils.getUserDetails(decodedJWT);
+            User user = (User) jwtUtils.getUserDetails(decodedJwt);
+            //获取Id
+            String id = jwtUtils.getId(decodedJwt);
             //创建一个新SecurityContext,避免多线程争抢
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             //创建一个Authentication
@@ -40,6 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             //放入SecurityContext
             context.setAuthentication(authenticationToken);
+            request.setAttribute(Const.USER_ID, id);
         }
         filterChain.doFilter(request, response);
     }
