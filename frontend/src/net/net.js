@@ -10,8 +10,8 @@ const defaultError = (error)=>{
 const authItemName = "access_token"
 
 //默认失败回调函数
-const defaultFailure = (message, code, url)=>{
-    console.warn(`请求地址: ${url}, 状态码: ${code}, 错误信息: ${message}`)
+const defaultFailure = (message, status, url)=>{
+    console.warn(`请求地址: ${url}, 状态码: ${status}, 错误信息: ${message}`)
     ElMessage.warning(message)
 }
 
@@ -22,10 +22,10 @@ function internalPost(url, data, header, success, failure, error = defaultError)
     axios.post(url, data,{
         headers: header
     }).then(({data}) =>{
-        if(data.success){
+        if(data.status === 200){
             success(data.data)
         }else {
-            failure(data.message, data.code, data.url)
+            failure(data.message, data.status, data.url)
         }
     }).catch(error)
 }
@@ -35,10 +35,10 @@ function internalGet(url,header, success, failure, error = defaultError){
     axios.get(url,{
         headers: header
     }).then(({data})=>{
-        if(data.success === true){
+        if(data.status === 200){
             success(data.message)
         }else{
-            failure(data.message, data.code, url)
+            failure(data.message, data.status, url)
         }
     }).catch(error)
 }

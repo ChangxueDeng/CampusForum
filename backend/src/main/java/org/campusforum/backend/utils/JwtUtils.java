@@ -55,7 +55,7 @@ public class JwtUtils {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
         //增加一小时
-        calendar.add(expire, Calendar.HOUR);
+        calendar.add(Calendar.HOUR_OF_DAY, expire);
         return calendar.getTime();
     }
 
@@ -108,6 +108,11 @@ public class JwtUtils {
                 .build();
     }
 
+    public String getId(DecodedJWT decodedJWT) {
+        Map<String, Claim> map = decodedJWT.getClaims();
+        return map.get("id").toString();
+    }
+
 
     /**
      * 验证token是否满足格式
@@ -147,7 +152,7 @@ public class JwtUtils {
     private boolean deleteJwtToken(String uuid, Date expire) {
         if(isInJwtBlack(uuid)) return false;
         //计算剩余时间
-        long time = Math.max(new Date().getTime() - expire.getTime(),0);
+        long time = Math.max(expire.getTime() - new Date().getTime(),1);
         //加入黑名单
         stringRedisTemplate.opsForValue().set(Const.BLACK_JWT + uuid, "", time, TimeUnit.MILLISECONDS);
         return true;
