@@ -34,20 +34,22 @@ public class LogRequestFilter extends OncePerRequestFilter {
 
     @Resource
     SnowflakeIdGenerator generator;
-    private static final Set<String> IGNORE_URL = Set.of("/swagger-ui", "v3/api-doc/");
+    private static final Set<String> IGNORE_URL = Set.of("/swagger-ui", "/v3/api-docs");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (isIgnoreUrl(request.getServletPath())) {
             filterChain.doFilter(request, response);
+        } else if(!isIgnoreUrl(request.getServletPath())){
+            long startTime = new Date().getTime();
+            ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request);
+            ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+            filterChain.doFilter(requestWrapper, responseWrapper);
+            requestStart(requestWrapper);
+            requestEnd(responseWrapper, startTime);
+            responseWrapper.copyBodyToResponse();
         }
-        long startTime = new Date().getTime();
-        ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request);
-        ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
-        filterChain.doFilter(requestWrapper, responseWrapper);
-        requestStart(requestWrapper);
-        requestEnd(responseWrapper, startTime);
-        responseWrapper.copyBodyToResponse();
+        filterChain.doFilter(request, response);
     }
 
     /**
@@ -57,7 +59,11 @@ public class LogRequestFilter extends OncePerRequestFilter {
      */
     private boolean isIgnoreUrl(String url){
         for (String str : IGNORE_URL) {
-            if (url.startsWith(str)) return true;
+            if (url.startsWith(str)) {
+                System.out.println(url.startsWith(str));
+                return true;
+            }
+
         }
         return false;
     }

@@ -66,7 +66,7 @@ public class SecurityConfiguration {
         return security
                 //访问权限
                 .authorizeHttpRequests(conf -> {
-                    conf.requestMatchers("/api/auth/**", "/swagger/**", "/v3/api/**").permitAll();
+                    conf.requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll();
                     conf.anyRequest().authenticated();
                 })
                 //csrf
