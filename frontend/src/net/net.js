@@ -25,7 +25,7 @@ function internalPost(url, data, header, success, failure, error = defaultError)
         if(data.status === 200){
             success(data.data)
         }else {
-            failure(data.message, data.status, data.url)
+            failure(data.message, data.status, url)
         }
     }).catch(error)
 }
@@ -36,7 +36,7 @@ function internalGet(url,header, success, failure, error = defaultError){
         headers: header
     }).then(({data})=>{
         if(data.status === 200){
-            success(data.message)
+            success(data.data)
         }else{
             failure(data.message, data.status, url)
         }
@@ -48,7 +48,7 @@ function takeAccessToken(){
     const str = localStorage.getItem(authItemName) || sessionStorage.getItem(authItemName)
     if(!str) return null
     const authObj = JSON.parse(str)
-    if(authObj.expire <= new Date()){
+    if(new Date(authObj.expire) <= new Date()){
         //过期后删除token
         deleteAccessToken()
         ElMessage.info('登陆状态已过期，请重新登陆')
@@ -116,9 +116,9 @@ function login(username, password, remember, success, failure = defaultFailure){
 }
 
 function logout(success, failure){
-    get('api/auth/logout' ,(message)=>{
+    get('api/auth/logout' ,()=>{
         deleteAccessToken()
-        ElMessage.success(message)
+        ElMessage.success("退出登陆成功")
         success()
     }, failure)
 }

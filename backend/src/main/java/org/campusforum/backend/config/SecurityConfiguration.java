@@ -75,7 +75,7 @@ public class SecurityConfiguration {
                 .formLogin(conf -> {
                     conf.loginProcessingUrl("/api/auth/login");
                     conf.successHandler(loginSuccessHandler());
-                    conf.failureHandler(logoutFailureHandler());
+                    conf.failureHandler(loginFailureHandler());
 
                 })
                 //退出登陆
@@ -107,8 +107,8 @@ public class SecurityConfiguration {
                     });
                 })
                 //添加过滤器
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(logRequestFilter, JwtFilter.class)
+                .addFilterBefore(logRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, LogRequestFilter.class)
                 .build();
     }
 
@@ -133,7 +133,7 @@ public class SecurityConfiguration {
             }
         };
     }
-    private AuthenticationFailureHandler logoutFailureHandler(){
+    private AuthenticationFailureHandler loginFailureHandler(){
         return new AuthenticationFailureHandler() {
             @Override
             public void onAuthenticationFailure(HttpServletRequest request,

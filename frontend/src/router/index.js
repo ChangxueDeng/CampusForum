@@ -27,7 +27,14 @@ const routes = [
     {
         path: '/index',
         name: 'index',
-        component: ()=> import('@//views/IndexPage.vue')
+        component: ()=> import('@/views/IndexPage.vue'),
+        children: [
+            {
+                path: 'user-setting',
+                name: 'user-setting',
+                component: ()=> import('@/components/index/UserSettingPage.vue')
+            },
+        ]
     }
 ]
 

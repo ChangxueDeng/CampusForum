@@ -66,6 +66,11 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     @Override
+    public Account findAccountById(int id) {
+        return this.query().eq("id", id).one();
+    }
+
+    @Override
     public AccountDTO coverDTO(Account account) {
         AccountDTO accountDTO = new AccountDTO();
         BeanUtils.copyProperties(account, accountDTO);

@@ -28,12 +28,9 @@ public class Result<T> {
     }
 
     public static <T> Result<T> success(T data) {
-        return new Result<>(StatusUtils.STATUS_OK, data, null);
+        return new Result<>(StatusUtils.STATUS_OK, data, "请求成功");
     }
 
-    public static <T> Result<T> success(String message) {
-        return new Result<>(StatusUtils.STATUS_OK, null, message);
-    }
 
     public static <T> Result<T> success(T data, String message) {
         return new Result<>(StatusUtils.STATUS_OK, data, message);

@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.annotation.Resource;
@@ -91,12 +92,11 @@ public class JwtUtils {
         try {
             String token = headerToken.substring(7);
             DecodedJWT decodedJwt = verifier.verify(token);
-            if(decodedJwt.getExpiresAt().after(new Date())) return null;
+            if(decodedJwt.getExpiresAt().before(new Date())) return null;
             return decodedJwt;
-        } catch (JWTDecodeException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            return null;
         }
-        return null;
     }
 
     //返回一个User对象
@@ -136,10 +136,9 @@ public class JwtUtils {
             String uuid = decodedJwt.getId();
             Date expire = decodedJwt.getExpiresAt();
             return deleteJwtToken(uuid, expire);
-        }catch (JWTDecodeException e){
-            e.printStackTrace();
+        }catch (Exception e){
+            return false;
         }
-        return false;
     }
 
 

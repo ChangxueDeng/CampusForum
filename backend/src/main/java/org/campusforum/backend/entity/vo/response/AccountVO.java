@@ -1,4 +1,4 @@
-package org.campusforum.backend.entity.dto;
+package org.campusforum.backend.entity.vo.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class AccountDTO {
-    private int id;
+@NoArgsConstructor
+public class AccountVO {
     private String username;
     private String role;
     private String email;

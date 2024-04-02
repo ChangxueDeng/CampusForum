@@ -13,6 +13,7 @@ import org.campusforum.backend.entity.vo.request.ResetPasswordVO;
  */
 public interface AccountService extends IService<Account> {
     public Account findAccountByUsernameOrEmail(String text);
+    public Account findAccountById(int id);
     public AccountDTO coverDTO(Account account);
     public String emailVerify(String email, String type, String ip);
     public String registerAccount(RegisterVO registerVO);
