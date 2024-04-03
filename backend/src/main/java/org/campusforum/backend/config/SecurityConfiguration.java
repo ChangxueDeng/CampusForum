@@ -5,7 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.campusforum.backend.entity.Result;
-import org.campusforum.backend.entity.dto.AccountDTO;
+import org.campusforum.backend.entity.dto.Account;
 import org.campusforum.backend.entity.vo.response.AuthorizeVO;
 import org.campusforum.backend.filter.JwtFilter;
 import org.campusforum.backend.filter.LogRequestFilter;
@@ -121,11 +121,11 @@ public class SecurityConfiguration {
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-                AccountDTO accountDTO = accountServiceImpl.coverDTO(accountServiceImpl.findAccountByUsernameOrEmail(user.getUsername()));
+                Account account = accountServiceImpl.findAccountByUsernameOrEmail(user.getUsername());
                 AuthorizeVO authorizeVO = new AuthorizeVO();
-                BeanUtils.copyProperties(accountDTO, authorizeVO);
+                BeanUtils.copyProperties(authorizeVO, authorizeVO);
                 //创建jwt令牌
-                String token = jwtUtils.createJwtToken(user, accountDTO.getUsername(), accountDTO.getId());
+                String token = jwtUtils.createJwtToken(user, account.getUsername(), account.getId());
                 Date expire = jwtUtils.createExpireTime();
                 authorizeVO.setToken(token);
                 authorizeVO.setExpire(expire);

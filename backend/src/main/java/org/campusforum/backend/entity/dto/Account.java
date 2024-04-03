@@ -1,4 +1,4 @@
-package org.campusforum.backend.entity;
+package org.campusforum.backend.entity.dto;
 
 
 import com.baomidou.mybatisplus.annotation.IdType;

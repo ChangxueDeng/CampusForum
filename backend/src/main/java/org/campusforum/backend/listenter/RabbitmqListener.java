@@ -10,6 +10,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * 消息队列监听
+ * @author ChangxueDeng
+ * @date 2024/04/03
+ */
 @Component
 @RabbitListener(queues = "email-campus")
 public class RabbitmqListener {

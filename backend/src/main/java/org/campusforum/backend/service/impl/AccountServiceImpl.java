@@ -2,8 +2,7 @@ package org.campusforum.backend.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
-import org.campusforum.backend.entity.Account;
-import org.campusforum.backend.entity.dto.AccountDTO;
+import org.campusforum.backend.entity.dto.Account;
 import org.campusforum.backend.entity.vo.request.RegisterVO;
 import org.campusforum.backend.entity.vo.request.ResetConfirmVO;
 import org.campusforum.backend.entity.vo.request.ResetPasswordVO;
@@ -12,7 +11,6 @@ import org.campusforum.backend.service.AccountService;
 import org.campusforum.backend.utils.Const;
 import org.campusforum.backend.utils.FlowUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -70,12 +68,6 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return this.query().eq("id", id).one();
     }
 
-    @Override
-    public AccountDTO coverDTO(Account account) {
-        AccountDTO accountDTO = new AccountDTO();
-        BeanUtils.copyProperties(account, accountDTO);
-        return accountDTO;
-    }
 
     @Override
     public String emailVerify(String email, String type, String ip) {

@@ -6,6 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
+/**
+ * 注册账户请求
+ * @author ChangxueDeng
+ * @date 2024/04/02
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -16,11 +16,20 @@ import org.campusforum.backend.utils.StatusUtils;
 @Data
 @AllArgsConstructor
 public class Result<T> {
-    //状态码
+
+    /**
+     * 状态
+     */
     int status;
-    //数据
+
+    /**
+     * 数据
+     */
     T data;
-    //消息
+
+    /**
+     * 消息
+     */
     String message;
 
     public static <T> Result<T> success() {

@@ -6,6 +6,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+/**
+ * 账户信息响应
+ * @author ChangxueDeng
+ * @date 2024/04/02
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
