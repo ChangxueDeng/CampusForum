@@ -16,13 +16,17 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DetailsSaveVO {
-    String username;
+    @Length(min = 2, max = 10)
+    private String username;
     @Min(0)
     @Max(1)
-    Integer gender;
-    String phone;
-    String qq;
-    String wx;
+    private Integer gender;
+    @Length(min = 11, max = 11)
+    private String phone;
+    @Length(max = 13)
+    private String qq;
+    @Length(max = 20)
+    private String wx;
     @Length(max = 200)
-    String desc;
+    private String desc;
 }

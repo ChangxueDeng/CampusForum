@@ -9,9 +9,9 @@ import lombok.Data;
  */
 @Data
 public class AccountDetailsVO {
-    Integer gender;
-    String phone;
-    String qq;
-    String wx;
-    String desc;
+    private Integer gender;
+    private String phone;
+    private String qq;
+    private String wx;
+    private String desc;
 }

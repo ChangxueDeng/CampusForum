@@ -83,7 +83,6 @@ const userRegister = ()=>{
 }
 
 //验证邮箱,并发送邮件
-
 const validateEmail = ()=>{
   coldTime.value = 60;
   post(`api/auth/ask-code?email=${form.email}&type=register`,
@@ -123,13 +122,13 @@ const validateEmail = ()=>{
     <div style="margin: 20px">
       <el-form :model="form" :rules="rules" @validate="onValid" ref="formRef">
         <el-form-item prop="username">
-          <el-input placeholder="用户名" :prefix-icon="User" type="text" v-model="form.username" maxlength="6"></el-input>
+          <el-input placeholder="用户名" :prefix-icon="User" type="text" v-model="form.username" minlength="2" maxlength="10"></el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input placeholder="密码" :prefix-icon="Lock" type="password" v-model="form.password" minlength="6"></el-input>
+          <el-input placeholder="密码" :prefix-icon="Lock" type="password" v-model="form.password" minlength="6" maxlength="16"></el-input>
         </el-form-item>
         <el-form-item prop="passwd_repeat">
-          <el-input placeholder="确认密码" :prefix-icon="Lock" type="password" v-model="form.passwd_repeat" minlength="6"></el-input>
+          <el-input placeholder="确认密码" :prefix-icon="Lock" type="password" v-model="form.passwd_repeat" minlength="6" maxlength="16"></el-input>
         </el-form-item>
         <el-form-item prop="email">
           <el-input placeholder="电子邮箱" :prefix-icon="Message" type="text" v-model="form.email"></el-input>
@@ -137,7 +136,7 @@ const validateEmail = ()=>{
         <el-row>
           <el-col :span="15">
             <el-form-item prop="email_code">
-              <el-input  placeholder="验证码" v-model="form.email_code"></el-input>
+              <el-input  placeholder="验证码" v-model="form.email_code" minlength="6" maxlength="6"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="7" style="margin-left: 15px">

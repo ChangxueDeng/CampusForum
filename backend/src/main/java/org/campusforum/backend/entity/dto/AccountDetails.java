@@ -19,15 +19,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AccountDetails {
     @TableId
-    Integer id;
+    private Integer id;
     @TableField
-    int gender;
+    private int gender;
     @TableField
-    String phone;
+    private String phone;
     @TableField
-    String qq;
+    private String qq;
     @TableField
-    String wx;
-    @TableField
-    String desc;
+    private String wx;
+    @TableField("`desc`")
+    private String desc;
 }

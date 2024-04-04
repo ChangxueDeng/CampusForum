@@ -58,10 +58,10 @@ function userLogin(){
     <div style="margin-top: 20px">
       <el-form style="margin: 20px;" :model="form" ref="formRef" :rules="rule">
         <el-form-item prop="username">
-          <el-input placeholder="用户名" :prefix-icon="User" v-model="form.username"></el-input>
+          <el-input placeholder="用户名" :prefix-icon="User" v-model="form.username" minlength="2" maxlength="10"></el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input placeholder="密码" :prefix-icon="Lock" v-model="form.password"></el-input>
+          <el-input placeholder="密码" type="password" :prefix-icon="Lock" v-model="form.password" minlength="6" maxlength="16"></el-input>
         </el-form-item>
       </el-form>
       <div style="text-align: center; margin-top: 30px" >

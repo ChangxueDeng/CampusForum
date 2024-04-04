@@ -10,17 +10,17 @@ const routes = [
             {
                 path: '/',
                 name: 'welcome-login',
-                component: ()=>import('@/components/welcome/LoginPage.vue')
+                component: ()=>import('@/views/welcome/LoginPage.vue')
             },
             {
                 path: '/register',
                 name: 'welcome-register',
-                component: () =>import('@/components/welcome/RegisterPage.vue')
+                component: () =>import('@/views/welcome/RegisterPage.vue')
             },
             {
                 path: '/forget',
                 name: 'welcome-forget',
-                component: ()=>import('@/components/welcome/ForgetPage.vue')
+                component: ()=>import('@/views/welcome/ForgetPage.vue')
             }
         ]
     },
@@ -32,8 +32,13 @@ const routes = [
             {
                 path: 'user-setting',
                 name: 'user-setting',
-                component: ()=> import('@/components/index/UserSettingPage.vue')
+                component: ()=> import('@/views/index/UserSettingPage.vue')
             },
+            {
+                path: 'privacy-setting',
+                name: 'privacy-setting',
+                component: ()=> import('@/views/index/PrivacySetting.vue')
+            }
         ]
     }
 ]

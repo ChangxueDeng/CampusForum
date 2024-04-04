@@ -34,6 +34,8 @@ public class RabbitmqListener {
                 createMessage("注册", "验证码为：" + code + "，有效时间3分钟", email);
             case "reset"->
                 createMessage("重置密码", "验证码为：" + code + "，有效时间3分钟", email);
+            case "modify" ->
+                createMessage("修改邮箱地址", "验证码为：" + code + "，有效时间3分钟", email);
             default-> null;
         };
         //发送

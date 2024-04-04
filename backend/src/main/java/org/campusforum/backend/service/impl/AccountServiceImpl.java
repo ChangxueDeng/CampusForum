@@ -3,6 +3,7 @@ package org.campusforum.backend.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.campusforum.backend.entity.dto.Account;
+import org.campusforum.backend.entity.vo.request.ChangePasswordVO;
 import org.campusforum.backend.entity.vo.request.RegisterVO;
 import org.campusforum.backend.entity.vo.request.ResetConfirmVO;
 import org.campusforum.backend.entity.vo.request.ResetPasswordVO;
@@ -42,6 +43,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
     @Resource
     PasswordEncoder passwordEncoder;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Account account = findAccountByUsernameOrEmail(username);
@@ -79,14 +81,18 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
             int code = random.nextInt(900000) + 100000;
             //存入消息队列
             Map<String, Object> map = Map.of("email", email, "type", type, "code", code);
-            //rabbitTemplate.convertAndSend("send-email", map);
             rabbitTemplate.convertAndSend("amq.direct","send-email", map);
             //存入redis,验证码失效实际为3分钟
-            stringRedisTemplate.opsForValue().set(Const.LIMIT_EMAIL_DATA + email, String.valueOf(code), 3, TimeUnit.MINUTES);
+            storeEmailVerify(email, String.valueOf(code));
             return null;
         }
     }
 
+    /**
+     * 发送邮件是否已经被限流
+     * @param ip 请求ip
+     * @return boolean
+     */
     private boolean isLimitedEmail(String ip){
         String key = Const.LIMIT_EMAIL + ip;
         if (!flowUtils.limitOnceCheck(key)) return true;
@@ -134,6 +140,25 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     @Override
+    public String modifyEmail(int id, ResetConfirmVO vo) {
+        String key = Const.LIMIT_EMAIL_DATA + vo.getEmail();
+        String code = getEmailVerify(key);
+        if (code == null) {
+            return "请先获取验证码";
+        } else if (!code.equals(vo.getCode())) {
+            return "验证码错误，请重试";
+        } else {
+            this.deleteEmailVerify(key);
+            Account account = this.findAccountByUsernameOrEmail(vo.getEmail());
+            if (account != null && account.getId() != id) {
+                return "该邮箱已被使用";
+            }
+            this.update().eq("id", id).set("email", vo.getEmail()).update();
+        }
+        return null;
+    }
+
+    @Override
     public String resetConfirm(ResetConfirmVO resetConfirmVO) {
         String email = resetConfirmVO.getEmail();
         String code = resetConfirmVO.getCode();
@@ -144,13 +169,41 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return null;
     }
 
+    @Override
+    public String changePassword(int id, ChangePasswordVO vo) {
+        String password = this.query().eq("id", id).one().getPassword();
+        //比较原密码是否填写正确
+        if (!passwordEncoder.matches(vo.getPassword(), password)) {
+            return "原密码错误，请重新错误";
+        }
+        boolean success = this.update().eq("id", id).set("password", passwordEncoder.encode(vo.getNewPassword()))
+                .update();
+        return success ? null : "未知错误，请联系管理员";
+    }
+
+    /**
+     * 将邮箱验证码存入redis，避免重复获取
+     * @param email 邮箱地址
+     * @param code 验证码
+     */
     private void storeEmailVerify(String email, String code) {
         String key = Const.LIMIT_EMAIL_DATA + email;
         stringRedisTemplate.opsForValue().set(key, code, 3, TimeUnit.MINUTES);
     }
+
+    /**
+     * 删除redis中的验证码
+     * @param key 邮箱key
+     */
     private void deleteEmailVerify(String key) {
         stringRedisTemplate.delete(key);
     }
+
+    /**
+     * 通过指定key获取redis中的验证码
+     * @param key 邮箱key
+     * @return {@link String}
+     */
     private String getEmailVerify(String key) {
         return stringRedisTemplate.opsForValue().get(key);
     }

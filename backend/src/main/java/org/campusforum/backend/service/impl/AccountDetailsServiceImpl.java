@@ -10,6 +10,7 @@ import org.campusforum.backend.service.AccountDetailsService;
 import org.campusforum.backend.service.AccountService;
 import org.springframework.stereotype.Service;
 
+
 /**
  * AccountDetailsService实现类
  * @author ChangxueDeng
@@ -20,6 +21,8 @@ public class AccountDetailsServiceImpl extends ServiceImpl<AccountDetailsMapper,
 
     @Resource
     AccountService accountService;
+
+
     @Override
     public AccountDetails findAccountDetailsById(int id) {
         return this.getById(id);

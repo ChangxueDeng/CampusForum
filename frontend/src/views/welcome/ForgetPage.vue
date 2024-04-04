@@ -102,7 +102,7 @@ const rules = {
     {type: 'email', message: '请输入合法邮件地址', trigger: ['blur', 'change']}],
   email_code: {required:true, message: '请输入获取的验证码', trigger:['blur', 'change']},
   password:[{required: true, message:'请输入密码', trigger:['blur','change']},
-    {min:8, message: '密码长度应大于8个字符', trigger: ['blur', 'change']}],
+    {min:8, message: '密码长度应大于6个字符', trigger: ['blur', 'change']}],
   passwd_repeat:[{validator: passwd_repeatValidate, trigger:['blur', 'change']}],
 }
 </script>
@@ -133,7 +133,7 @@ const rules = {
             <el-row>
               <el-col :span="15">
                 <el-form-item prop="email_code">
-                  <el-input placeholder="验证码" :prefix-icon="Lock" v-model="form.email_code"></el-input>
+                  <el-input placeholder="验证码" :prefix-icon="Lock" v-model="form.email_code" minlength="6" maxlength="6"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="7" style="margin-left: 14px">
@@ -155,10 +155,10 @@ const rules = {
           <div style="margin-top: 20px">
             <el-form style="margin: 20px" :model="form" ref="formRefDo" :rules="rules">
               <el-form-item prop="password">
-                <el-input type="password" :prefix-icon="Lock" placeholder="密码" v-model="form.password"></el-input>
+                <el-input type="password" :prefix-icon="Lock" placeholder="密码" v-model="form.password" minlength="6" maxlength="16"></el-input>
               </el-form-item>
               <el-form-item prop="passwd_repeat">
-                <el-input type="password" :prefix-icon="Lock" placeholder="确认密码" v-model="form.passwd_repeat"></el-input>
+                <el-input type="password" :prefix-icon="Lock" placeholder="确认密码" v-model="form.passwd_repeat" minlength="6" maxlength="16"></el-input>
               </el-form-item>
             </el-form>
           </div>

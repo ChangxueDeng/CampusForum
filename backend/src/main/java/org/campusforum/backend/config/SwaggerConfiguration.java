@@ -14,7 +14,9 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * SwaggerAPI文档配置类
+ *
  * @author ChangxueDeng
+ * @date 2024/04/04
  */
 @SecurityScheme(type = SecuritySchemeType.HTTP, scheme = "Bearer", name = Const.HEAD_TOKEN,
                 in = SecuritySchemeIn.HEADER) //安全方案

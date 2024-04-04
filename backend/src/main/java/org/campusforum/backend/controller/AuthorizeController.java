@@ -41,11 +41,10 @@ public class AuthorizeController {
      * @param request 请求
      * @return {@link String}
      */
-
     @PostMapping("/ask-code")
     @Operation(summary = "发送验证码", description = "发送指定类型验证码到指定收件邮箱")
     public String sendEmailVerify(@Parameter(description = "验证码接收邮箱") @Email @RequestParam String email,
-                                  @Parameter(description = "验证码类型，分为register和reset两种") @Pattern (regexp = "register|reset")@RequestParam String type,
+                                  @Parameter(description = "验证码类型，分为register,reset和modify三种") @Pattern (regexp = "register|reset|modify")@RequestParam String type,
                                   @Parameter(description = "HttpServletRequest") HttpServletRequest request) {
         return messageHandler(()-> accountServiceImpl.emailVerify(email, type, request.getRemoteAddr()));
     }

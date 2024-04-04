@@ -76,7 +76,6 @@ public class SecurityConfiguration {
                     conf.loginProcessingUrl("/api/auth/login");
                     conf.successHandler(loginSuccessHandler());
                     conf.failureHandler(loginFailureHandler());
-
                 })
                 //退出登陆
                 .logout(conf ->{
@@ -109,6 +108,7 @@ public class SecurityConfiguration {
                 //添加过滤器
                 .addFilterBefore(logRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, LogRequestFilter.class)
+                //.addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
@@ -123,12 +123,12 @@ public class SecurityConfiguration {
                 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
                 Account account = accountServiceImpl.findAccountByUsernameOrEmail(user.getUsername());
                 AuthorizeVO authorizeVO = new AuthorizeVO();
-                BeanUtils.copyProperties(authorizeVO, authorizeVO);
                 //创建jwt令牌
                 String token = jwtUtils.createJwtToken(user, account.getUsername(), account.getId());
                 Date expire = jwtUtils.createExpireTime();
                 authorizeVO.setToken(token);
                 authorizeVO.setExpire(expire);
+                BeanUtils.copyProperties(account, authorizeVO);
                 response.getWriter().write(Result.success(authorizeVO,"登录成功").toJsonString());
             }
         };

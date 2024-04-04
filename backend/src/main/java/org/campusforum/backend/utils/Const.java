@@ -12,6 +12,7 @@ public class Const {
 
     public static final int ORDER_FILTER_CORS = -102;
     public static final int ORDER_FILTER_LIMIT = -101;
+    public static final String JSON_CONTENT_TYPE = "application/json";
     public static final String USER_ID = "uid";
     public static final String BLACK_JWT = "black:jwt:";
     public static final String HEAD_TOKEN = "Authorization";

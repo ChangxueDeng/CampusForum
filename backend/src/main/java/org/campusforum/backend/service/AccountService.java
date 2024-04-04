@@ -2,6 +2,7 @@ package org.campusforum.backend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.campusforum.backend.entity.dto.Account;
+import org.campusforum.backend.entity.vo.request.ChangePasswordVO;
 import org.campusforum.backend.entity.vo.request.RegisterVO;
 import org.campusforum.backend.entity.vo.request.ResetConfirmVO;
 import org.campusforum.backend.entity.vo.request.ResetPasswordVO;
@@ -54,4 +55,21 @@ public interface AccountService extends IService<Account> {
       * @return {@link String}
       */
      String resetPassword(ResetPasswordVO resetPasswordVO);
+
+     /**
+      *
+      * 修改用户绑定邮箱
+      * @param id 用户id
+      * @param vo 用户邮箱修改参数
+      * @return {@link String}
+      */
+     String modifyEmail(int id, ResetConfirmVO vo);
+
+     /**
+      * 修改用户密码
+      * @param id 用户id
+      * @param vo 用户密码修改参数
+      * @return {@link String}
+      */
+     String changePassword(int id, ChangePasswordVO vo);
 }

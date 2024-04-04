@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 /**
- * 重置密码校验请求
+ * 重置校验请求
  * @author ChangxueDeng
  * @date 2024/04/02
  */

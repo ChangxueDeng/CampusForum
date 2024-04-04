@@ -155,7 +155,7 @@ get("/api/user/info", (data)=> {
                     信息设置
                   </template>
                 </el-menu-item>
-                <el-menu-item >
+                <el-menu-item index="/index/privacy-setting">
                   <template #title>
                     <el-icon><Unlock/></el-icon>
                     安全设置

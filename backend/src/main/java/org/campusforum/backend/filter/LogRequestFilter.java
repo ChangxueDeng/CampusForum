@@ -19,8 +19,6 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -28,8 +26,9 @@ import java.util.Set;
  * 将每次请求的情况进行打印
  * @author ChangxueDeng
  */
-@Component
+
 @Slf4j
+@Component
 public class LogRequestFilter extends OncePerRequestFilter {
 
     @Resource
@@ -41,7 +40,7 @@ public class LogRequestFilter extends OncePerRequestFilter {
         if (isIgnoreUrl(request.getServletPath())) {
             filterChain.doFilter(request, response);
         } else if(!isIgnoreUrl(request.getServletPath())){
-            long startTime = new Date().getTime();
+            long startTime = System.currentTimeMillis();
             ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request);
             ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
             filterChain.doFilter(requestWrapper, responseWrapper);
@@ -49,7 +48,6 @@ public class LogRequestFilter extends OncePerRequestFilter {
             requestEnd(responseWrapper, startTime);
             responseWrapper.copyBodyToResponse();
         }
-        filterChain.doFilter(request, response);
     }
 
     /**
@@ -60,7 +58,6 @@ public class LogRequestFilter extends OncePerRequestFilter {
     private boolean isIgnoreUrl(String url){
         for (String str : IGNORE_URL) {
             if (url.startsWith(str)) {
-                System.out.println(url.startsWith(str));
                 return true;
             }
 
@@ -77,8 +74,8 @@ public class LogRequestFilter extends OncePerRequestFilter {
         long reqId = generator.getNextId();
         //加入日志
         MDC.put("reqId", String.valueOf(reqId));
-        Object object = null;
-        if ("application/json".equals(requestWrapper.getContentType())) {
+        Object object;
+        if (Const.JSON_CONTENT_TYPE.equals(requestWrapper.getContentType())) {
             //获取json格式的参数
             byte[] content = requestWrapper.getContentAsByteArray();
             String requestBody = new String(content, StandardCharsets.UTF_8);
@@ -108,7 +105,7 @@ public class LogRequestFilter extends OncePerRequestFilter {
      * @param startTime 开始时间
      */
     private void requestEnd(ContentCachingResponseWrapper responseWrapper, long startTime) {
-        long time = new Date().getTime() - startTime;
+        long time = System.currentTimeMillis() - startTime;
         int status = responseWrapper.getStatus();
         String content = status != 200 ? status + "错误" : new String(responseWrapper.getContentAsByteArray());
         log.info("请求处理耗时: {} ms | 响应结果{}", time, content);
