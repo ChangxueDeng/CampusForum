@@ -3,7 +3,7 @@
 import Card from "@/components/Card.vue";
 import {Lock, Setting, Switch} from "@element-plus/icons-vue";
 import {reactive,ref} from "vue";
-import {post} from "@/net/net.js";
+import {post, get} from "@/net/net.js";
 import {ElMessage} from "element-plus";
 
 const form = reactive({
@@ -54,18 +54,51 @@ function resetPassword(){
     }
   })
 }
+const privacy = reactive({
+  gender: false,
+  phone: false,
+  qq: false,
+  wx: false,
+  email: false,
+})
+const saving = ref(true)
+
+get('api/user/privacy', data => {
+  privacy.gender = data.gender
+  privacy.phone = data.phone
+  privacy.qq = data.qq
+  privacy.wx = data.wx
+  privacy.email = data.email
+  saving.value = false;
+})
+
+function savaPrivacy(type, status){
+  saving.value = true;
+  post('api/user/sava-privacy',{
+    type: type,
+    status: status
+  } ,()=>{
+    ElMessage.success("隐私设置修改成功")
+    saving.value = false;
+  })
+}
 </script>
 
 <template>
   <div style="margin: auto; max-width: 600px">
     <div style="margin-top: 20px">
-      <card :icon="Setting" title="隐私设置" desc="在这里设置哪些内容可以被别人看到">
+      <card :icon="Setting" title="隐私设置" desc="在这里设置哪些内容可以被别人看到" v-loading="saving">
         <div class="checkbox-list">
-          <el-checkbox>公开展示我的性别</el-checkbox>
-          <el-checkbox>公开展示我的手机号</el-checkbox>
-          <el-checkbox>公开展示我的QQ号</el-checkbox>
-          <el-checkbox>公开展示我的微信号</el-checkbox>
-          <el-checkbox>公开展示我的电子邮箱地址</el-checkbox>
+          <el-checkbox @change="savaPrivacy('gender', privacy.gender)"
+          v-model="privacy.gender">公开展示我的性别</el-checkbox>
+          <el-checkbox @change="savaPrivacy('phone', privacy.phone)"
+          v-model="privacy.phone">公开展示我的手机号</el-checkbox>
+          <el-checkbox @change="savaPrivacy('qq', privacy.qq)"
+          v-model="privacy.qq">公开展示我的QQ号</el-checkbox>
+          <el-checkbox @change="savaPrivacy('wx', privacy.wx)"
+          v-model="privacy.wx">公开展示我的微信号</el-checkbox>
+          <el-checkbox @change="savaPrivacy('email', privacy.email)"
+          v-model="privacy.email">公开展示我的电子邮箱地址</el-checkbox>
         </div>
 
       </card>

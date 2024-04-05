@@ -12,12 +12,16 @@ import jakarta.validation.Valid;
 import org.campusforum.backend.entity.Result;
 import org.campusforum.backend.entity.dto.Account;
 import org.campusforum.backend.entity.dto.AccountDetails;
+import org.campusforum.backend.entity.dto.AccountPrivacy;
 import org.campusforum.backend.entity.vo.request.ChangePasswordVO;
 import org.campusforum.backend.entity.vo.request.DetailsSaveVO;
+import org.campusforum.backend.entity.vo.request.PrivacySaveVO;
 import org.campusforum.backend.entity.vo.request.ResetConfirmVO;
 import org.campusforum.backend.entity.vo.response.AccountDetailsVO;
+import org.campusforum.backend.entity.vo.response.AccountPrivacyVO;
 import org.campusforum.backend.entity.vo.response.AccountVO;
 import org.campusforum.backend.service.AccountDetailsService;
+import org.campusforum.backend.service.AccountPrivacyService;
 import org.campusforum.backend.service.AccountService;
 import org.campusforum.backend.utils.Const;
 import org.campusforum.backend.utils.StatusUtils;
@@ -43,7 +47,8 @@ public class AccountController {
     AccountService accountService;
     @Resource
     AccountDetailsService accountDetailsService;
-
+    @Resource
+    AccountPrivacyService accountPrivacyService;
     /**
      * 获取用户信息
      * @param id 用户id
@@ -133,6 +138,40 @@ public class AccountController {
                     content = @Content(schema = @Schema(implementation = ChangePasswordVO.class)))
             @RequestBody @Validated ChangePasswordVO vo) {
         return messageHandle(() -> accountService.changePassword(id, vo));
+    }
+
+    /**
+     * 保存用户隐私设置
+     * @param id 用户id
+     * @param vo 隐私设置参赛
+     * @return {@link Result}<{@link Void}>
+     */
+    @PostMapping("sava-privacy")
+    public Result<Void> savaPrivacy(
+            @Parameter(description = "用户id",
+                    content = @Content(schema = @Schema(implementation = int.class)))
+            @RequestAttribute(Const.USER_ID) int id,
+            @Parameter(description = "隐私设置参数",
+                    content = @Content(schema = @Schema(implementation = PrivacySaveVO.class)))
+            @RequestBody @Valid PrivacySaveVO vo){
+        accountPrivacyService.savePrivacy(id, vo);
+        return Result.success();
+    }
+
+    /**
+     * 获取用户隐私设置
+     * @param id 用户id
+     * @return {@link Result}<{@link AccountPrivacyVO}>
+     */
+    @GetMapping("privacy")
+    public Result<AccountPrivacyVO> privacy(
+            @Parameter(description = "用户id",
+                    content = @Content(schema = @Schema(implementation = int.class)))
+            @RequestAttribute(Const.USER_ID) int id) {
+        AccountPrivacy accountPrivacy = accountPrivacyService.findAccountPrivacyById(id);
+        AccountPrivacyVO accountPrivacyVO = new AccountPrivacyVO();
+        BeanUtils.copyProperties(accountPrivacy, accountPrivacyVO);
+        return Result.success(accountPrivacyVO);
     }
 
     /**
