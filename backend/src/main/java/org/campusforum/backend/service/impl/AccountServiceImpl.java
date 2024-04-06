@@ -113,7 +113,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
             return "电子邮件地址已存在";
         if (existAccountByUsername(username))
             return "用户名已被占用";
-        Account account = new Account(null, username, password, email, "user", new Date());
+        Account account = new Account(null, username, password, email, "user", new Date(),null);
         this.save(account);
         stringRedisTemplate.delete(Const.LIMIT_EMAIL_DATA + email);
         return null;

@@ -33,4 +33,6 @@ public class Account {
     private String role;
     @TableField
     private Date registerTime;
+    @TableField
+    private String avatar;
 }

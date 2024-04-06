@@ -33,7 +33,7 @@ public class LogRequestFilter extends OncePerRequestFilter {
 
     @Resource
     SnowflakeIdGenerator generator;
-    private static final Set<String> IGNORE_URL = Set.of("/swagger-ui", "/v3/api-docs");
+    private static final Set<String> IGNORE_URL = Set.of("/swagger-ui", "/v3/api-docs", "/images/**");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

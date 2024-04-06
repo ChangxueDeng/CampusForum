@@ -61,7 +61,7 @@ function takeAccessToken(){
 function accessHeader(){
     const token = takeAccessToken()
     if(token)
-        return `Bearer ${takeAccessToken()}`
+        return {"Authorization" : `Bearer ${takeAccessToken()}`}
     return null
 }
 
@@ -87,19 +87,19 @@ function deleteAccessToken(){
 //外部post
 
 function post(url , data, success, failure = defaultFailure){
-    internalPost(url, data,{
+    internalPost(url, data,
         // "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization" : accessHeader()
-    }, success, failure)
+        accessHeader()
+    , success, failure)
 }
 
 //外部get
 
 function get(url, success, failure = defaultFailure){
-    internalGet(url, {
+    internalGet(url,
         // "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization" : accessHeader()
-    }, success, failure)
+        accessHeader()
+    , success, failure)
 }
 
 function login(username, password, remember, success, failure = defaultFailure){
@@ -126,4 +126,4 @@ function logout(success, failure){
 function unAuthorized(){
     return !takeAccessToken()
 }
-export {post, get, login, logout, unAuthorized}
+export {post, get, login, logout, unAuthorized, accessHeader}

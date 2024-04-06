@@ -12,6 +12,7 @@ public class Const {
 
     public static final int ORDER_FILTER_CORS = -102;
     public static final int ORDER_FILTER_LIMIT = -101;
+    public static final long AVATAR_MAXSIZE = 500 * 1024;
     public static final String JSON_CONTENT_TYPE = "application/json";
     public static final String USER_ID = "uid";
     public static final String BLACK_JWT = "black:jwt:";
