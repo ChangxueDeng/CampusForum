@@ -82,7 +82,7 @@ get("/api/user/info", (data)=> {
                   <el-icon><Location></Location></el-icon>
                   <span>校园论坛</span>
                 </template>
-                <el-menu-item index="1-1">
+                <el-menu-item index="/index/">
                   <template #title>
                     <el-icon><ChatDotSquare/></el-icon>
                     帖子广场

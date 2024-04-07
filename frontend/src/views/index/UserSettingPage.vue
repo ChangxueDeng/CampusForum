@@ -111,8 +111,8 @@ function beforeAvatarUpload(rawFile){
   if (rawFile.type !== "image/jpeg" && rawFile.type !== "image/png") {
     ElMessage.error("头像只能是: JPEG/PNG格式")
     return false
-  } else if (rawFile.size > 1024 * 100) {
-    ElMessage.error("头像大小不能大于100KB")
+  } else if (rawFile.size > 1024 * 500) {
+    ElMessage.error("头像大小不能大于500KB")
     return false;
   } else {
     return true

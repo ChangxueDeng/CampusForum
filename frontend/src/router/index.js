@@ -30,6 +30,11 @@ const routes = [
         component: ()=> import('@/views/IndexPage.vue'),
         children: [
             {
+                path: '',
+                name: 'topic-list',
+                component: () => import ('@/views/forum/TopicListPage.vue')
+            },
+            {
                 path: 'user-setting',
                 name: 'user-setting',
                 component: ()=> import('@/views/index/UserSettingPage.vue')
