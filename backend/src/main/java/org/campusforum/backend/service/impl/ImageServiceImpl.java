@@ -1,23 +1,26 @@
 package org.campusforum.backend.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.minio.GetObjectArgs;
-import io.minio.GetObjectResponse;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.errors.*;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.minio.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.campusforum.backend.entity.dto.Account;
+import org.campusforum.backend.entity.dto.ImageStore;
 import org.campusforum.backend.mapper.AccountMapper;
+import org.campusforum.backend.mapper.ImageStoreMapper;
 import org.campusforum.backend.service.ImageService;
+import org.campusforum.backend.utils.Const;
+import org.campusforum.backend.utils.FlowUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -26,13 +29,47 @@ import java.util.UUID;
  */
 @Service
 @Slf4j
-public class ImageServiceImpl implements ImageService {
+public class ImageServiceImpl extends ServiceImpl<ImageStoreMapper, ImageStore> implements ImageService {
     @Value("${minio.bucket}")
     private String bucket;
     @Resource
     private MinioClient minioClient;
     @Resource
     AccountMapper mapper;
+    @Resource
+    FlowUtils flowUtils;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+
+    @Override
+    public String uploadCache(MultipartFile file, int id) throws IOException {
+        String key = Const.FORUM_IMAGE_COUNT + id;
+        if (flowUtils.limitCountPeriod(key, 3600, 20)) {
+            return null;
+        }
+        Date date = new Date();
+        //生成UUID
+        String imageName = UUID.randomUUID().toString().replace("-", "");
+        //文件路径
+        imageName = "/cache/" + dateFormat.format(date) + "/" + imageName;
+        //进行上传
+        PutObjectArgs args = PutObjectArgs.builder()
+                .bucket(bucket)
+                .object(imageName)
+                .stream(file.getInputStream(), file.getSize(), -1)
+                .build();
+        try {
+            minioClient.putObject(args);
+            if (this.save(new ImageStore(id, imageName, date))) {
+                return imageName;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("图片上传失败: {}", e.getMessage());
+            return null;
+        }
+    }
+
     @Override
     public String uploadAvatar(MultipartFile file, int id) throws IOException {
         //生成UUID
@@ -47,7 +84,11 @@ public class ImageServiceImpl implements ImageService {
                 .build();
         try {
             minioClient.putObject(args);
+            //获取旧头像
+            String oldAvatar = mapper.selectById(id).getAvatar();
             if (mapper.update(null, Wrappers.<Account>update().eq("id", id).set("avatar", imageName)) > 0) {
+                //进行删除旧头像
+                this.deleteOldAvatar(oldAvatar);
                 return imageName;
             } else {
                 return null;
@@ -56,6 +97,20 @@ public class ImageServiceImpl implements ImageService {
             log.error("图片上传失败: {}", e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * 删除旧头像文件
+     * <p>将旧头像从Minio存储桶中删除</p>
+     * @param avatar 图像路径
+     * @throws Exception 异常
+     */
+    private void deleteOldAvatar(String avatar) throws Exception{
+        if (avatar == null || avatar.isEmpty()) {
+            return;
+        }
+        RemoveObjectArgs args = RemoveObjectArgs.builder().bucket( bucket).object(avatar).build();
+        minioClient.removeObject(args);
     }
 
     @Override

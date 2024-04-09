@@ -95,7 +95,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      */
     private boolean isLimitedEmail(String ip){
         String key = Const.LIMIT_EMAIL + ip;
-        if (!flowUtils.limitOnceCheck(key)) return true;
+        if (!flowUtils.limitOnce(key, 60)) return true;
         return false;
     }
 

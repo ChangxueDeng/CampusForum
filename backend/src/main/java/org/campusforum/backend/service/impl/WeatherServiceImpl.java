@@ -46,7 +46,7 @@ public class WeatherServiceImpl implements WeatherService {
         //返回数据是JSON格式并进行了Gzip压缩。
         JSONObject geo = decompressString2Json(data);
         //定位
-        JSONObject location = null;
+        JSONObject location;
         if (geo != null) {
             location = geo.getJSONArray("location").getJSONObject(0);
         }else {
@@ -56,7 +56,7 @@ public class WeatherServiceImpl implements WeatherService {
             return null;
         } else {
             //获取城市id
-            int id = location.getInteger("id");
+            String id = location.getString("id");
             String key = "weather" + id;
             //如何缓存中存在信息，直接从redis中获取
             String cache = stringRedisTemplate.opsForValue().get(key);
@@ -70,7 +70,7 @@ public class WeatherServiceImpl implements WeatherService {
                 return null;
             }
             //新获取到的信息存入redis
-            stringRedisTemplate.opsForValue().set("key", JSONObject.from(vo).toJSONString(), 1, TimeUnit.HOURS);
+            stringRedisTemplate.opsForValue().set(key, JSONObject.from(vo).toJSONString(), 1, TimeUnit.HOURS);
             return vo;
         }
     }
@@ -81,7 +81,7 @@ public class WeatherServiceImpl implements WeatherService {
      * @param location 定位信息
      * @return {@link WeatherVO}
      */
-    private WeatherVO fetchFromApi(int id, JSONObject location){
+    private WeatherVO fetchFromApi(String id, JSONObject location){
         WeatherVO vo = new WeatherVO();
         //设置定位信息
         vo.setLocation(location);

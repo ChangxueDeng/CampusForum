@@ -146,7 +146,7 @@ public class AccountController {
      * @param vo 隐私设置参赛
      * @return {@link Result}<{@link Void}>
      */
-    @PostMapping("sava-privacy")
+    @PostMapping("/sava-privacy")
     public Result<Void> savaPrivacy(
             @Parameter(description = "用户id",
                     content = @Content(schema = @Schema(implementation = int.class)))
@@ -163,7 +163,7 @@ public class AccountController {
      * @param id 用户id
      * @return {@link Result}<{@link AccountPrivacyVO}>
      */
-    @GetMapping("privacy")
+    @GetMapping("/privacy")
     public Result<AccountPrivacyVO> privacy(
             @Parameter(description = "用户id",
                     content = @Content(schema = @Schema(implementation = int.class)))
@@ -172,6 +172,11 @@ public class AccountController {
         AccountPrivacyVO accountPrivacyVO = new AccountPrivacyVO();
         BeanUtils.copyProperties(accountPrivacy, accountPrivacyVO);
         return Result.success(accountPrivacyVO);
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "测试";
     }
 
     /**

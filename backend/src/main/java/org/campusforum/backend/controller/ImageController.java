@@ -57,4 +57,32 @@ public class ImageController {
             }
         }
     }
+
+    /**
+     * 上传贴子图片
+     * @param file 图片文件
+     * @param id 用户id
+     * @return {@link Result}<{@link String}>
+     * @throws IOException IO异常
+     */
+    @PostMapping("/cache")
+    public Result<String> uploadCache(
+            @Parameter(description = "图片文件", content = @Content(schema = @Schema(implementation = MultipartFile.class)))
+            @RequestParam("file") MultipartFile file,
+            @Parameter(description = "用户id", content = @Content(schema = @Schema(implementation = int.class)))
+            @RequestAttribute(Const.USER_ID) int id) throws IOException {
+        if (file.getSize() > Const.CACHE_IMAGE_MAX_SIZE) {
+            return Result.failure(StatusUtils.STATUS_BAD_REQUEST, "图片大小不能大于5MB");
+        } else {
+            log.info("正在进行图片上传");
+            String url = imageService.uploadCache(file, id);
+            if (url != null) {
+                log.info("图片上传成功, 大小： {}", file.getSize());
+                return Result.success(url);
+            } else {
+                return Result.failure(StatusUtils.STATUS_BAD_REQUEST, "图片上传失败，联系管理员");
+            }
+        }
+
+    }
 }

@@ -33,7 +33,7 @@ public class ObjectController {
      * @throws Exception 异常
      */
     @Operation(summary = "获取用户头像", description = "从Minio中获取用户头像")
-    @GetMapping("/images/avatar/**")
+    @GetMapping("/images/**")
     public void imageFetch(HttpServletRequest request, HttpServletResponse response) throws Exception {
         fetchImage(request, response);
     }

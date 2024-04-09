@@ -3,9 +3,10 @@
 import LiteCard from "@/components/LiteCard.vue";
 import {Calendar, CollectionTag, EditPen, Link} from "@element-plus/icons-vue";
 import Weather from "@/components/Weather.vue";
-import {computed, reactive} from "vue";
+import {computed, reactive, ref} from "vue";
 import {get} from "@/net/net.js";
 import {ElMessage} from "element-plus";
+import TopicEditor from "@/components/TopicEditor.vue";
 
 const today = computed(()=> {
   const date = new Date()
@@ -19,6 +20,8 @@ const weather = reactive({
   success: false
 })
 
+const editorShow = ref(false);
+
 navigator.geolocation.getCurrentPosition(position => {
   const longitude = position.coords.longitude;
   const latitude = position.coords.latitude;
@@ -30,7 +33,7 @@ navigator.geolocation.getCurrentPosition(position => {
   console.log(error)
   ElMessage.warning("位置信息获取超时，请检查网络设置")
 }, {
-  timeout: 3000,
+  timeout: 5000,
   enableHighAccuracy: true
 })
 </script>
@@ -38,7 +41,7 @@ navigator.geolocation.getCurrentPosition(position => {
 <template>
   <div style="display: flex; margin: 20px auto; gap: 20px; max-width: 900px">
     <div style="flex: 1;">
-      <lite-card style="padding: 0">
+      <lite-card style="padding: 0" @click="editorShow = true">
         <div class="creat-topic">
           <el-icon style="translate: 0 2px"><EditPen/></el-icon>
           点击发表主题...
@@ -106,6 +109,8 @@ navigator.geolocation.getCurrentPosition(position => {
       </div>
 
     </div>
+    <topic-editor :show="editorShow" @close="editorShow = false">
+    </topic-editor>
   </div>
 </template>
 

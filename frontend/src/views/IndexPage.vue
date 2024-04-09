@@ -76,7 +76,7 @@ get("/api/user/info", (data)=> {
       <el-container>
         <el-aside width="220px">
           <el-scrollbar style="height: calc(100vh - 55px);">
-            <el-menu style="min-height: calc(100vh - 55px);" router :default-active="$route.path">
+            <el-menu style="min-height: calc(100vh - 55px);" router :default-active="$route.path" :default-openeds="['1', '2', '3']">
               <el-sub-menu index="1">
                 <template #title>
                   <el-icon><Location></Location></el-icon>

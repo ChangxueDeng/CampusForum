@@ -5,6 +5,7 @@ import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import axios from "axios";
 import {createPinia} from "pinia";
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 const app = createApp(App)
 const pinia = createPinia()
