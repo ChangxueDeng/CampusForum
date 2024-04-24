@@ -24,6 +24,7 @@ import org.campusforum.backend.service.AccountDetailsService;
 import org.campusforum.backend.service.AccountPrivacyService;
 import org.campusforum.backend.service.AccountService;
 import org.campusforum.backend.utils.Const;
+import org.campusforum.backend.utils.ControllerUtils;
 import org.campusforum.backend.utils.StatusUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.validation.annotation.Validated;
@@ -49,6 +50,8 @@ public class AccountController {
     AccountDetailsService accountDetailsService;
     @Resource
     AccountPrivacyService accountPrivacyService;
+    @Resource
+    ControllerUtils controllerUtils;
     /**
      * 获取用户信息
      * @param id 用户id
@@ -56,14 +59,14 @@ public class AccountController {
      */
     @Operation(summary = "用户信息获取", description = "获取用户信息")
     @GetMapping("/info")
-    public String info(
+    public Result<AccountVO> info(
             @Parameter(description = "用户id",
             content = @Content(schema = @Schema(implementation = int.class)))
             @RequestAttribute(Const.USER_ID) int id) {
         Account account = accountService.findAccountById(id);
         AccountVO accountVO = new AccountVO();
         BeanUtils.copyProperties(account, accountVO);
-        return Result.success(accountVO).toJsonString();
+        return Result.success(accountVO);
     }
 
     /**
@@ -119,7 +122,7 @@ public class AccountController {
             @Parameter(description = "邮箱修改参数",
                     content = @Content(schema = @Schema(implementation = ResetConfirmVO.class)))
             @RequestBody @Valid ResetConfirmVO vo) {
-        return messageHandle(() -> accountService.modifyEmail(id, vo));
+        return controllerUtils.messageHandler(() -> accountService.modifyEmail(id, vo));
     }
 
     /**
@@ -137,7 +140,7 @@ public class AccountController {
             @Parameter(description = "修改密码参数",
                     content = @Content(schema = @Schema(implementation = ChangePasswordVO.class)))
             @RequestBody @Validated ChangePasswordVO vo) {
-        return messageHandle(() -> accountService.changePassword(id, vo));
+        return controllerUtils.messageHandler(() -> accountService.changePassword(id, vo));
     }
 
     /**
@@ -177,20 +180,6 @@ public class AccountController {
     @GetMapping("/test")
     public String test() {
         return "测试";
-    }
-
-    /**
-     * 消息处理
-     * @param supplier 接收方法返回字符串
-     * @return {@link Result}<{@link T}>
-     */
-    private <T> Result<T> messageHandle(Supplier<String> supplier) {
-        String message = supplier.get();
-        if (message == null) {
-            return Result.success();
-        } else {
-            return Result.failure(StatusUtils.STATUS_BAD_REQUEST, message);
-        }
     }
 
 }

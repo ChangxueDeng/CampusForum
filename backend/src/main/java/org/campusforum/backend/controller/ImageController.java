@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.campusforum.backend.entity.Result;
 import org.campusforum.backend.service.ImageService;
@@ -70,8 +71,10 @@ public class ImageController {
             @Parameter(description = "图片文件", content = @Content(schema = @Schema(implementation = MultipartFile.class)))
             @RequestParam("file") MultipartFile file,
             @Parameter(description = "用户id", content = @Content(schema = @Schema(implementation = int.class)))
-            @RequestAttribute(Const.USER_ID) int id) throws IOException {
+            @RequestAttribute(Const.USER_ID) int id,
+            HttpServletResponse response) throws IOException {
         if (file.getSize() > Const.CACHE_IMAGE_MAX_SIZE) {
+            response.setStatus(StatusUtils.STATUS_BAD_REQUEST);
             return Result.failure(StatusUtils.STATUS_BAD_REQUEST, "图片大小不能大于5MB");
         } else {
             log.info("正在进行图片上传");
@@ -80,6 +83,7 @@ public class ImageController {
                 log.info("图片上传成功, 大小： {}", file.getSize());
                 return Result.success(url);
             } else {
+                response.setStatus(StatusUtils.STATUS_BAD_REQUEST);
                 return Result.failure(StatusUtils.STATUS_BAD_REQUEST, "图片上传失败，联系管理员");
             }
         }

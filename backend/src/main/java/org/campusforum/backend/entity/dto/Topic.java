@@ -8,27 +8,27 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 
 /**
- * 用户详细信息类对应 account_details表
  * @author ChangxueDeng
- * @date 2024/04/02
+ * @date 2024/04/09
  */
 @Data
-@TableName(value = "account_details")
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountDetails {
+@TableName("topic")
+public class Topic {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     @TableField
-    private int gender;
+    private String title;
     @TableField
-    private String phone;
+    private String content;
     @TableField
-    private String qq;
+    private Integer type;
     @TableField
-    private String wx;
-    @TableField("`desc`")
-    private String desc;
+    private Date time;
+    @TableField
+    private Integer uid;
 }

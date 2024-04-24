@@ -51,7 +51,7 @@ public class LimitFlowFilter extends OncePerRequestFilter {
             String countKey = Const.LIMIT_COUNT_KEY + ip;
             String limitBanKey = Const.LIMIT_BAN_KEY + ip;
             int period = 30;
-            int frequency = 30;
+            int frequency = 200;
             int limitTime = 60;
             return flowUtils.limitPeriod(countKey, limitBanKey, period, frequency, limitTime);
         }

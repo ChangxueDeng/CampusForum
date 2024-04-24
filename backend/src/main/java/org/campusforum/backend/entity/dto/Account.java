@@ -21,7 +21,7 @@ import java.util.Date;
 @TableName(value = "account")
 public class Account {
 
-    @TableId(type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     @TableField
     private String username;

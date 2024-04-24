@@ -5,6 +5,10 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 用户隐私设置
  * @author ChangxueDeng
@@ -25,4 +29,16 @@ public class AccountPrivacy {
     private boolean wx = true;
     @TableField
     private boolean email = true;
+    public String[] hiddenFields() {
+        List<String> strings = new ArrayList<>();
+        Field[] fields = this.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            try{
+                if (field.getType().equals(boolean.class) && !field.getBoolean(this)) {
+                    strings.add(field.getName());
+                }
+            }catch (Exception ignore) {}
+        }
+        return strings.toArray(String[]::new);
+    }
 }

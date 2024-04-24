@@ -30,9 +30,21 @@ const routes = [
         component: ()=> import('@/views/IndexPage.vue'),
         children: [
             {
-                path: '',
-                name: 'topic-list',
-                component: () => import ('@/views/forum/TopicListPage.vue')
+                path:'',
+                name: 'topics',
+                component: ()=> import("@/views/forum/Forum.vue"),
+                children: [
+                    {
+                        path: '',
+                        name: 'topic-list',
+                        component: () => import ('@/views/forum/TopicListPage.vue')
+                    },
+                    {
+                        path: 'topic-detail/:tid',
+                        name: 'topic-detail',
+                        component: ()=> import('@/views/forum/TopicDetailPage.vue')
+                    }
+                ]
             },
             {
                 path: 'user-setting',
@@ -43,7 +55,8 @@ const routes = [
                 path: 'privacy-setting',
                 name: 'privacy-setting',
                 component: ()=> import('@/views/index/PrivacySetting.vue')
-            }
+            },
+
         ]
     }
 ]
