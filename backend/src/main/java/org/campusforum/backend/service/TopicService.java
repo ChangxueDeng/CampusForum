@@ -7,6 +7,7 @@ import org.campusforum.backend.entity.dto.TopicType;
 import org.campusforum.backend.entity.vo.request.AddCommentVO;
 import org.campusforum.backend.entity.vo.request.CreateTopicVO;
 import org.campusforum.backend.entity.vo.request.UpdateTopicVO;
+import org.campusforum.backend.entity.vo.response.CommentVO;
 import org.campusforum.backend.entity.vo.response.TopicDetailVo;
 import org.campusforum.backend.entity.vo.response.TopicPreviewVO;
 import org.campusforum.backend.entity.vo.response.TopicTopVO;
@@ -81,4 +82,5 @@ public interface TopicService extends IService<Topic> {
      * @return {@link String}
      */
     String createComment(AddCommentVO vo, int uid);
+    List<CommentVO> listComments(int tid, int page);
 }

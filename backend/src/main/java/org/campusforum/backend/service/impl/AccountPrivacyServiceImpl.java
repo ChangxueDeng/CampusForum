@@ -36,6 +36,7 @@ public class AccountPrivacyServiceImpl extends ServiceImpl<AccountPrivacyMapper,
         //如果为空时写入
         if (accountPrivacy == null) {
             AccountPrivacy creatPrivacy = new AccountPrivacy(id);
+            log.error(creatPrivacy.toString());
             this.save(creatPrivacy);
             return creatPrivacy;
         } else {

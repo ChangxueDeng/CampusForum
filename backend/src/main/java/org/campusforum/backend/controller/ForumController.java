@@ -192,4 +192,9 @@ public class ForumController {
                                    @RequestAttribute(Const.USER_ID) int id) {
         return controllerUtils.messageHandler(()-> topicService.createComment(vo, id));
     }
+    @GetMapping("/comments")
+    public Result<List<CommentVO>> comments(@RequestParam @Min(0) int tid,
+                                            @RequestParam @Min(0) int page) {
+        return Result.success(topicService.listComments(tid, page));
+    }
 }

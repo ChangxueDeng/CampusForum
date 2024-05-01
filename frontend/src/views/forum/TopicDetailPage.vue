@@ -25,17 +25,18 @@ const topic = reactive({
   data: null,
   like: false,
   collect: false,
-  comments: []
+  comments: null,
+  page: 1
 })
 const comment = reactive({
   quote: -1,
 })
-const content = computed(()=>{
-  const ops = JSON.parse(topic.data.content).ops
+
+function convert2Html(content){
+  const ops = JSON.parse(content).ops
   const converter = new QuillDeltaToHtmlConverter(ops, {inlineStyles:true})
   return converter.convert();
-
-})
+}
 
 
 function init() {
@@ -43,6 +44,7 @@ function init() {
     topic.data = data
     topic.like = data.interact.like
     topic.collect = data.interact.collect
+    loadComments(1)
   })
 }
 init()
@@ -72,7 +74,16 @@ function interact(type, message) {
     }
   })
 }
-
+function loadComments(page) {
+  topic.comments = null;
+  topic.page = page;
+  get(`api/forum/comments?tid=${tid}&page=${page}`, (data)=> {
+    topic.comments = data
+  })
+}
+function submitCommentAfter() {
+  loadComments(Math.floor(++topic.data.commentCount / 10) + 1)
+}
 </script>
 
 <template>
@@ -111,9 +122,8 @@ function interact(type, message) {
         <el-divider style="margin: 10px 0"></el-divider>
         <div class="desc">{{topic.data.user.desc || '已隐藏或未填写'}}</div>
       </div>
-
       <div class="topic-main-right">
-        <div class="topic-content" v-html="content"></div>
+        <div class="topic-content" v-html="convert2Html(topic.data.content)"></div>
         <el-divider></el-divider>
         <div>
           <div style="font-size: 14px; color: grey; text-align: center">发帖时间: {{new Date(topic.data.time).toLocaleString()}}</div>
@@ -134,6 +144,53 @@ function interact(type, message) {
         </div>
       </div>
     </div>
+    <transition name="el-fade-in-linear" mode="out-in">
+      <div v-if="topic.comments">
+        <div class="topic-main" style="margin-top: 10px" v-for="item in topic.comments">
+          <div class="topic-main-left">
+            <el-avatar :src="axios.defaults.baseURL + '/images' + item.user.avatar" :size="60"></el-avatar>
+            <div>
+              <div style="font-size: 18px; font-weight: bold">
+                {{topic.data.user.username}}
+                <span style="color: hotpink;" v-if="topic.data.user.gender === 1" >
+              <el-icon><Female/></el-icon>
+            </span>
+                <span style="color: dodgerblue;" v-if="topic.data.user.gender === 0">
+              <el-icon><Male/></el-icon>
+            </span>
+              </div>
+              <div class="desc">{{topic.data.user.email}}</div>
+            </div>
+            <el-divider style="margin: 10px 0"></el-divider>
+            <div style="text-align: left; margin: 0 5px;">
+              <div class="desc">手机号: {{item.user.phone || '已隐藏或未填写' }}</div>
+              <div class="desc">QQ号: {{item.user.qq||'已隐藏或未填写'}}</div>
+              <div class="desc">微信号: {{item.user.wx || '已隐藏或未填写'}}}</div>
+            </div>
+            <el-divider style="margin: 10px 0"></el-divider>
+            <div class="desc">{{item.user.desc || '已隐藏或未填写'}}</div>
+          </div>
+
+          <div class="topic-main-right">
+            <div>
+              <div style="font-size: 14px; color: grey; text-align: left">评论时间: {{new Date(item.time).toLocaleString()}}</div>
+            </div>
+            <div class="topic-content" v-html="convert2Html(item.content)"></div>
+          </div>
+        </div>
+        <div style="width: fit-content; margin: 20px auto">
+          <el-pagination
+              background
+              layout="prev, pager, next"
+              :page-size="10"
+              :total="topic.data.commentCount"
+              :current-page="topic.page"
+              @current-change="loadComments"
+              hide-on-single-page>
+          </el-pagination>
+        </div>
+      </div>
+    </transition>
     <topic-editor :show="editorShow" @close="editorShow = false" v-if="topic.data"
                   @success="editorShow = false"
                   :default-text="topic.data.content" :default-title="topic.data.title"
@@ -141,7 +198,7 @@ function interact(type, message) {
     <div class="add-comment" @click="commentEditorShow = true">
       <el-icon><Plus/></el-icon>
     </div>
-    <topic-comment-editor :show="commentEditorShow" @close="commentEditorShow = false"
+    <topic-comment-editor :show="commentEditorShow" @close="[commentEditorShow = false, submitCommentAfter()]"
                           :tid="tid" :quote="comment.quote"></topic-comment-editor>
   </div>
 </template>

@@ -23,11 +23,13 @@ function submitComment() {
     emit('close')
   })
 }
+
+const init = ()=> content.value = new Delta()
 </script>
 
 <template>
   <div>
-    <el-drawer :model-value="show" @close="emit('close')"
+    <el-drawer :model-value="show" @close="emit('close')" @open="init"
                direction="btt" :size="270" :close-on-click-modal="false"
                title="发表评论">
       <div>

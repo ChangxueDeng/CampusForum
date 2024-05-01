@@ -12,6 +12,7 @@ import org.campusforum.backend.entity.dto.*;
 import org.campusforum.backend.entity.vo.request.AddCommentVO;
 import org.campusforum.backend.entity.vo.request.CreateTopicVO;
 import org.campusforum.backend.entity.vo.request.UpdateTopicVO;
+import org.campusforum.backend.entity.vo.response.CommentVO;
 import org.campusforum.backend.entity.vo.response.TopicDetailVo;
 import org.campusforum.backend.entity.vo.response.TopicPreviewVO;
 import org.campusforum.backend.entity.vo.response.TopicTopVO;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -126,6 +128,13 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         List<String> image = new ArrayList<>();
         StringBuilder previewText = new StringBuilder();
         JSONArray ops = JSONObject.parseObject(topic.getContent()).getJSONArray("ops");
+        this.shortContent(ops, previewText, obj -> image.add(obj.toString()));
+        vo.setText(previewText.length() > 300 ? previewText.substring(0, 300) : previewText.toString());
+        vo.setImages(image);
+        return vo;
+    }
+
+    private void shortContent(JSONArray ops, StringBuilder previewText, Consumer<Object> imageHandler) {
         for (Object obj : ops) {
             Object insert = JSONObject.from(obj).get("insert");
             if (insert instanceof String text) {
@@ -133,13 +142,9 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
                     previewText.append(text);
                 }
             } else if (insert instanceof Map<?, ?> map) {
-                Optional.ofNullable(map.get("image")).ifPresent(i -> image.add(i.toString()));
+                Optional.ofNullable(map.get("image")).ifPresent(imageHandler);
             }
         }
-
-        vo.setText(previewText.length() > 300 ? previewText.substring(0, 300) : previewText.toString());
-        vo.setImages(image);
-        return vo;
     }
 
     @Override
@@ -160,6 +165,7 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         vo.setInteract(interact);
         TopicDetailVo.User user = new TopicDetailVo.User();
         vo.setUser(fillUserDetailsByPrivacy(user, topic.getUid()));
+        vo.setCommentCount(topicCommentMapper.selectCount(Wrappers.<TopicComment>query().eq("tid", tid)));
         return vo;
     }
     /**
@@ -178,9 +184,12 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         AccountDetails accountDetails = accountDetailsMapper.selectById(uid);
         // 根据用户ID查询账户隐私设置
         AccountPrivacy accountPrivacy = accountPrivacyMapper.selectById(uid);
-
         // 分析隐私设置，获取需要隐藏的字段
-        String[] strings = accountPrivacy.hiddenFields();
+        String[] strings = null;
+        if (accountPrivacy != null) {
+            strings= accountPrivacy.hiddenFields();
+
+        }
         // 根据隐私设置，将账户和账户详情中需要隐藏的字段值复制到目标对象
         BeanUtils.copyProperties(account, target, strings);
         BeanUtils.copyProperties(accountDetails, target, strings);
@@ -270,7 +279,7 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
     public String createComment(AddCommentVO vo, int uid) {
         if (contentLimit(JSONObject.parseObject(vo.getContent()), TOPIC_COMMENT_MAX)) {
             return "评论内容过多，发表失败";
-        } else if (flowUtils.limitCountPeriod(Const.FORUM_TOPIC_COMMENT_COUNT + uid, 60, 2 )) {
+        } else if (flowUtils.limitCountPeriod(Const.FORUM_TOPIC_COMMENT_COUNT + uid, 60, 2)) {
             return "评论频繁，请稍后再试";
         }
         TopicComment comment = new TopicComment();
@@ -280,5 +289,27 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         comment.setTime(new Date());
         topicCommentMapper.insert(comment);
         return null;
+    }
+
+    @Override
+    public List<CommentVO> listComments(int tid, int page) {
+        Page<TopicComment> commentPage = Page.of(page, 10);
+        topicCommentMapper.selectPage(commentPage, Wrappers.<TopicComment>query().eq("tid", tid));
+        return commentPage.getRecords().stream().map(dto -> {
+            CommentVO vo = new CommentVO();
+            BeanUtils.copyProperties(dto, vo);
+            if(dto.getQuote() > 0) {
+                JSONObject object = JSONObject.parseObject(
+                        topicCommentMapper.selectOne(Wrappers.<TopicComment>query()
+                                .eq("id", dto.getQuote()).orderByAsc("time")).getContent());
+                StringBuilder builder = new StringBuilder();
+                this.shortContent(object.getJSONArray("ops"), builder, ignore -> {} );
+                vo.setQuote(builder.toString());
+            }
+            CommentVO.User user = new CommentVO.User();
+            this.fillUserDetailsByPrivacy(user, dto.getUid());
+            vo.setUser(user);
+            return vo;
+        }).toList();
     }
 }

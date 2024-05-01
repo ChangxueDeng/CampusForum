@@ -14,6 +14,7 @@ public class TopicDetailVo {
     Date time;
     User user;
     Interact interact;
+    Long commentCount;
     @Data
     public static class User {
         Integer id;
