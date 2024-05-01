@@ -3,7 +3,7 @@ import {useRoute} from "vue-router";
 import {get, post} from "@/net/net.js"
 import {reactive, ref} from "vue";
 import axios from "axios";
-import {ArrowLeft, CircleCheck, EditPen, Female, Male, Star} from "@element-plus/icons-vue";
+import {ArrowLeft, CircleCheck, EditPen, Female, Male, Plus, Star} from "@element-plus/icons-vue";
 import {computed} from "vue";
 import {QuillDeltaToHtmlConverter} from "quill-delta-to-html";
 import Card from "@/components/Card.vue";
@@ -13,9 +13,11 @@ import InteractButton from "@/components/InteractButton.vue";
 import {ElMessage} from "element-plus";
 import {useStore} from "@/store/index.js";
 import TopicEditor from "@/components/TopicEditor.vue";
+import TopicCommentEditor from "@/components/TopicCommentEditor.vue";
 
 const route = useRoute()
 const editorShow = ref(false)
+const commentEditorShow = ref(false)
 const tid = route.params.tid
 const store = useStore()
 const topicUpdate = ref(false)
@@ -25,7 +27,9 @@ const topic = reactive({
   collect: false,
   comments: []
 })
-
+const comment = reactive({
+  quote: -1,
+})
 const content = computed(()=>{
   const ops = JSON.parse(topic.data.content).ops
   const converter = new QuillDeltaToHtmlConverter(ops, {inlineStyles:true})
@@ -134,10 +138,34 @@ function interact(type, message) {
                   @success="editorShow = false"
                   :default-text="topic.data.content" :default-title="topic.data.title"
                   :default-type="topic.data.type" submit-button="立即修改" :submit="update"/>
+    <div class="add-comment" @click="commentEditorShow = true">
+      <el-icon><Plus/></el-icon>
+    </div>
+    <topic-comment-editor :show="commentEditorShow" @close="commentEditorShow = false"
+                          :tid="tid" :quote="comment.quote"></topic-comment-editor>
   </div>
 </template>
 
 <style scoped>
+.add-comment{
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--el-bg-color-overlay);
+  box-shadow: var(--el-box-shadow-lighter);
+  font-size: 18px;
+  color: var(--el-color-primary);
+  text-align: center;
+  line-height: 45px;
+  &:hover{
+    cursor: pointer;
+    background-color: var(--el-color-primary);
+    color: white;
+  }
+}
 .topic-page{
   display: flex;
   flex-direction: column;

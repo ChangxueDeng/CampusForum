@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.campusforum.backend.entity.dto.*;
+import org.campusforum.backend.entity.vo.request.AddCommentVO;
 import org.campusforum.backend.entity.vo.request.CreateTopicVO;
 import org.campusforum.backend.entity.vo.request.UpdateTopicVO;
 import org.campusforum.backend.entity.vo.response.TopicDetailVo;
@@ -45,8 +46,12 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
     @Resource
     AccountPrivacyMapper accountPrivacyMapper;
     @Resource
+    TopicCommentMapper topicCommentMapper;
+    @Resource
     private StringRedisTemplate stringRedisTemplate;
 
+    private static final int TOPIC_CONTENT_MAX = 20000;
+    private static final int TOPIC_COMMENT_MAX = 2000;
     @Override
     public List<TopicType> typeList() {
         return topicTypeMapper.selectList(null);
@@ -54,11 +59,11 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
 
     @Override
     public String createTopic(CreateTopicVO vo, int uid) {
-        if (contentLimit(vo.getContent())) {
+        if (contentLimit(vo.getContent(), TOPIC_CONTENT_MAX)) {
             return "主题内容过多，发布失败";
         } else if (!types().contains(vo.getType())) {
             return "主题类型非法";
-        } else if (flowUtils.limitCountPeriod(Const.FORUM_TOPIC_COUNT + uid, 3, 3600)) {
+        } else if (flowUtils.limitCountPeriod(Const.FORUM_TOPIC_COUNT + uid, 3600, 3)) {
             return "发文频繁，稍后再试";
         }
         Topic topic = new Topic();
@@ -78,7 +83,7 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
 
     @Override
     public String updateTopic(UpdateTopicVO vo, int uid) {
-        if (contentLimit(vo.getContent())) {
+        if (contentLimit(vo.getContent(), TOPIC_CONTENT_MAX)) {
             return "主题内容过多，发布失败";
         } else if (!types().contains(vo.getType())){
             return "主题类型非法";
@@ -240,7 +245,7 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         }).toList();
     }
 
-    private boolean contentLimit(JSONObject object) {
+    private boolean contentLimit(JSONObject object, int max) {
         if (object == null) {
             return false;
         }
@@ -251,7 +256,7 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
                 len += text.length();
             }
         }
-        return len > 20000;
+        return len > max;
     }
 
     private Set<Integer> types() {
@@ -259,5 +264,21 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
                 .stream().
                 map(TopicType::getId)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public String createComment(AddCommentVO vo, int uid) {
+        if (contentLimit(JSONObject.parseObject(vo.getContent()), TOPIC_COMMENT_MAX)) {
+            return "评论内容过多，发表失败";
+        } else if (flowUtils.limitCountPeriod(Const.FORUM_TOPIC_COMMENT_COUNT + uid, 60, 2 )) {
+            return "评论频繁，请稍后再试";
+        }
+        TopicComment comment = new TopicComment();
+        comment.setTid(vo.getTid());
+        comment.setUid(uid);
+        comment.setContent(vo.getContent());
+        comment.setTime(new Date());
+        topicCommentMapper.insert(comment);
+        return null;
     }
 }

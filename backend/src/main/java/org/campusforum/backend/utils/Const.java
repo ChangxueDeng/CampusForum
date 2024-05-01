@@ -26,5 +26,7 @@ public class Const {
     //public static final String BLACK_LIMIT_REQUEST = "black:limit:request:";
     public static final String FORUM_IMAGE_COUNT = "forum:image:";
     public static final String FORUM_TOPIC_COUNT = "forum:topic:";
+    public static final String FORUM_TOPIC_COMMENT_COUNT = "forum:topic:comment:";
     public static final String FORUM_TOPIC_PREVIEW_CACHE = "forum:topic:preview:cache:";
+
 }

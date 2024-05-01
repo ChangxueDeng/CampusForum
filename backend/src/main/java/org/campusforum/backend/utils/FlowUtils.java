@@ -66,6 +66,7 @@ public class FlowUtils {
     public boolean limitCountPeriod(String countKey, int period, int frequency) {
         return this.counterCheck(countKey, period, frequency);
     }
+
     /**
      * 计数验证，从redis中进行计数，并且判断计数是否满足封禁条件
      * @param countKey 计数键

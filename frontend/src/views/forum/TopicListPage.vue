@@ -29,9 +29,8 @@ const today = computed(()=> {
   const date = new Date()
   return `${date.getFullYear()} 年 ${date.getMonth() + 1 } 月 ${date.getDate()} 日`
 })
-
+const ip = ref('')
 const store = useStore()
-
 const weather = reactive({
   location : {},
   now: {},
@@ -87,6 +86,9 @@ navigator.geolocation.getCurrentPosition(position => {
 }, {
   timeout: 5000,
   enableHighAccuracy: true
+})
+get('api/forum/ip',(data)=> {
+  ip.value = data
 })
 </script>
 
@@ -198,7 +200,7 @@ navigator.geolocation.getCurrentPosition(position => {
           </div>
           <div class="info-text">
             <div>当前IP地址</div>
-            <div>127.0.0.1</div>
+            <div>{{ip}}</div>
           </div>
         </lite-card>
         <div style="font-size: 14px; margin-top: 14px; color: grey">

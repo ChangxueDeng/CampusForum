@@ -10,7 +10,6 @@ import {ElMessage} from "element-plus";
 import {ref} from "vue";
 import ColorDot from "@/components/ColorDot.vue";
 import {useStore} from "@/store/index.js";
-
 const props = defineProps({
   show: Boolean,
   defaultTitle : {
@@ -249,21 +248,5 @@ const contentLength = computed(()=> deltaToText(editor.text).length)
 }
 :deep(.el-drawer__header) {
   margin: 0;
-}
-:deep(.ql-toolbar) {
-  border-radius: 5px 5px 0 0;
-  border-color: var(--el-border-color);
-}
-:deep(.ql-container) {
-  border-radius: 0 0 5px 5px;
-  border-color: var(--el-border-color);
-
-}
-:deep(.ql-editor.ql-blank::before) {
-  color: var(--el-text-color-placeholder);
-  font-style: normal;
-}
-:deep(.ql-editor){
-  font-size: 15px;
 }
 </style>

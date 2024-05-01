@@ -7,12 +7,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import org.campusforum.backend.entity.Result;
 import org.campusforum.backend.entity.dto.Interact;
 import org.campusforum.backend.entity.dto.TopicType;
+import org.campusforum.backend.entity.vo.request.AddCommentVO;
 import org.campusforum.backend.entity.vo.request.CreateTopicVO;
 import org.campusforum.backend.entity.vo.request.UpdateTopicVO;
 import org.campusforum.backend.entity.vo.response.*;
@@ -178,5 +180,16 @@ public class ForumController {
     public Result<Void> updateTopic(@Valid @RequestBody UpdateTopicVO vo, @RequestAttribute(Const.USER_ID) int id) {
         // 通过controllerUtils的messageHandler方法处理更新主题逻辑，返回操作结果
         return controllerUtils.messageHandler(() -> topicService.updateTopic(vo, id));
+    }
+
+    @GetMapping("/ip")
+    public Result<String> getIp(HttpServletRequest request) {
+        return Result.success(request.getRemoteAddr());
+    }
+
+    @PostMapping("/add-comment")
+    public Result<Void> addComment(@Valid @RequestBody AddCommentVO vo,
+                                   @RequestAttribute(Const.USER_ID) int id) {
+        return controllerUtils.messageHandler(()-> topicService.createComment(vo, id));
     }
 }
