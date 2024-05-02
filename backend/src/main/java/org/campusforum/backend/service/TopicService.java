@@ -83,4 +83,5 @@ public interface TopicService extends IService<Topic> {
      */
     String createComment(AddCommentVO vo, int uid);
     List<CommentVO> listComments(int tid, int page);
+    String deleteComment(int cid, int uid);
 }

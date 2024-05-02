@@ -3,11 +3,15 @@ package org.campusforum.backend.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.campusforum.backend.entity.dto.Account;
+import org.campusforum.backend.entity.dto.AccountDetails;
+import org.campusforum.backend.entity.dto.AccountPrivacy;
 import org.campusforum.backend.entity.vo.request.ChangePasswordVO;
 import org.campusforum.backend.entity.vo.request.RegisterVO;
 import org.campusforum.backend.entity.vo.request.ResetConfirmVO;
 import org.campusforum.backend.entity.vo.request.ResetPasswordVO;
+import org.campusforum.backend.mapper.AccountDetailsMapper;
 import org.campusforum.backend.mapper.AccountMapper;
+import org.campusforum.backend.mapper.AccountPrivacyMapper;
 import org.campusforum.backend.service.AccountService;
 import org.campusforum.backend.utils.Const;
 import org.campusforum.backend.utils.FlowUtils;
@@ -40,7 +44,10 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     RabbitTemplate rabbitTemplate;
     @Resource
     FlowUtils flowUtils;
-
+    @Resource
+    AccountPrivacyMapper accountPrivacyMapper;
+    @Resource
+    AccountDetailsMapper accountDetailsMapper;
     @Resource
     PasswordEncoder passwordEncoder;
 
@@ -116,6 +123,10 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         Account account = new Account(null, username, password, email, "user", new Date(),null);
         this.save(account);
         stringRedisTemplate.delete(Const.LIMIT_EMAIL_DATA + email);
+        accountPrivacyMapper.insert(new AccountPrivacy(account.getId()));
+        AccountDetails accountDetails = new AccountDetails();
+        accountDetails.setId(account.getId());
+        accountDetailsMapper.insert(accountDetails);
         return null;
     }
 

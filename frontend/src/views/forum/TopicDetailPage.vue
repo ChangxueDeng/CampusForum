@@ -3,7 +3,7 @@ import {useRoute} from "vue-router";
 import {get, post} from "@/net/net.js"
 import {reactive, ref} from "vue";
 import axios from "axios";
-import {ArrowLeft, CircleCheck, EditPen, Female, Male, Plus, Star} from "@element-plus/icons-vue";
+import {ArrowLeft, ChatSquare, CircleCheck, Delete, EditPen, Female, Male, Plus, Star} from "@element-plus/icons-vue";
 import {computed} from "vue";
 import {QuillDeltaToHtmlConverter} from "quill-delta-to-html";
 import Card from "@/components/Card.vue";
@@ -29,7 +29,7 @@ const topic = reactive({
   page: 1
 })
 const comment = reactive({
-  quote: -1,
+  quote: null,
 })
 
 function convert2Html(content){
@@ -84,6 +84,14 @@ function loadComments(page) {
 function submitCommentAfter() {
   loadComments(Math.floor(++topic.data.commentCount / 10) + 1)
 }
+
+function deleteComment(cid) {
+  get(`api/forum/delete-comment?cid=${cid}`, ()=> {
+    ElMessage.success("删除成功")
+    loadComments(topic.page)
+  })
+}
+
 </script>
 
 <template>
@@ -100,7 +108,7 @@ function submitCommentAfter() {
     </div>
     <div class="topic-main">
       <div class="topic-main-left">
-        <el-avatar :src="axios.defaults.baseURL + '/images' + topic.data.user.avatar" :size="60"></el-avatar>
+        <el-avatar :src="store.avatarUserUrl(topic.data.user.avatar)" :size="60"></el-avatar>
         <div>
           <div style="font-size: 18px; font-weight: bold">
             {{topic.data.user.username}}
@@ -148,7 +156,7 @@ function submitCommentAfter() {
       <div v-if="topic.comments">
         <div class="topic-main" style="margin-top: 10px" v-for="item in topic.comments">
           <div class="topic-main-left">
-            <el-avatar :src="axios.defaults.baseURL + '/images' + item.user.avatar" :size="60"></el-avatar>
+            <el-avatar :src="store.avatarUserUrl(item.user.avatar)" :size="60"></el-avatar>
             <div>
               <div style="font-size: 18px; font-weight: bold">
                 {{topic.data.user.username}}
@@ -175,8 +183,18 @@ function submitCommentAfter() {
             <div>
               <div style="font-size: 14px; color: grey; text-align: left">评论时间: {{new Date(item.time).toLocaleString()}}</div>
             </div>
+            <div v-if="item.quote" class="comment-quote">
+              回复: {{item.quote}}
+            </div>
             <div class="topic-content" v-html="convert2Html(item.content)"></div>
+            <div style="text-align: right">
+              <el-link :icon="ChatSquare" @click="commentEditorShow = true; comment.quote = item"
+                       type="info">&nbsp;回复评论</el-link>
+              <el-link :icon="Delete" type="danger" v-if="item.user.id === store.user.id"
+                       style="margin-left: 20px" @click="deleteComment(item.id)">&nbsp;删除评论</el-link>
+            </div>
           </div>
+
         </div>
         <div style="width: fit-content; margin: 20px auto">
           <el-pagination
@@ -198,12 +216,20 @@ function submitCommentAfter() {
     <div class="add-comment" @click="commentEditorShow = true">
       <el-icon><Plus/></el-icon>
     </div>
-    <topic-comment-editor :show="commentEditorShow" @close="[commentEditorShow = false, submitCommentAfter()]"
-                          :tid="tid" :quote="comment.quote"></topic-comment-editor>
+    <topic-comment-editor :show="commentEditorShow" @close="commentEditorShow = false; comment.quote = null"
+                          :tid="tid"  @success="submitCommentAfter" :quote="comment.quote"></topic-comment-editor>
   </div>
 </template>
 
 <style scoped>
+.comment-quote{
+  font-size: 13px;
+  color: grey;
+  background-color: rgba(94, 94, 94, 0.2);
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+}
 .add-comment{
   position: fixed;
   bottom: 20px;

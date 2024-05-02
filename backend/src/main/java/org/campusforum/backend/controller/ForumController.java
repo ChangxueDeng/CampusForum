@@ -197,4 +197,9 @@ public class ForumController {
                                             @RequestParam @Min(0) int page) {
         return Result.success(topicService.listComments(tid, page));
     }
+    @GetMapping("/delete-comment")
+    public Result<Void> deleteComment(@RequestParam @Min(0) int cid,
+                                      @RequestAttribute(Const.USER_ID) int id) {
+        return controllerUtils.messageHandler(() -> topicService.deleteComment(cid, id));
+    }
 }

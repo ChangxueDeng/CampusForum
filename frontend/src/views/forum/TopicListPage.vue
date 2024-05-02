@@ -130,7 +130,7 @@ get('api/forum/ip',(data)=> {
             <lite-card  v-for="item in topics.list" @click="router.push('/index/topic-detail/' + item.id)" class="topic-card">
               <div style="display: flex">
                 <div>
-                  <el-avatar :size="30" :src="`${axios.defaults.baseURL}/images${item.avatar}`"></el-avatar>
+                  <el-avatar :size="30" :src="store.avatarUserUrl(item.avatar)"></el-avatar>
                 </div>
                 <div style="margin-left: 7px">
                   <div style="font-size: 13px; font-weight: bold">{{item.username}}</div>
