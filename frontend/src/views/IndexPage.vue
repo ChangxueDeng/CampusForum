@@ -4,8 +4,8 @@ import {router} from "@/router/index.js";
 import {useStore} from "@/store/index.js";
 import {reactive, ref} from "vue";
 import {
-  Back,
-  ChatDotSquare,
+  Back, Bell,
+  ChatDotSquare, Check,
   Location, Lock,
   Lollipop, Message,
   Notification,
@@ -13,6 +13,8 @@ import {
   Position, Search, Setting,
   Stopwatch, Unlock, User
 } from "@element-plus/icons-vue";
+import LiteCard from "@/components/LiteCard.vue";
+import {ElMessage} from "element-plus";
 
 const store = useStore()
 
@@ -26,7 +28,26 @@ get("/api/user/info", (data)=> {
   store.user = data
   loading.value = false
 })
-
+const notification = ref([])
+function getNotification() {
+  get('/api/notification/list', (data)=> {
+    notification.value = data
+  })
+}
+function deleteAllNotification() {
+  get('/api/notification/delete-all',()=>{
+    ElMessage.success("清楚所有消息成功")
+    notification.value = []
+  })
+}
+function confirmNotification(id, url) {
+  get(`/api/notification/delete?id=${id}`, ()=> {
+    ElMessage.success("确认消息成功")
+    getNotification()
+    window.open(url)
+  })
+}
+getNotification()
 </script>
 
 <template>
@@ -50,6 +71,34 @@ get("/api/user/info", (data)=> {
           </el-input>
         </div>
         <div class="user-info">
+          <el-popover placement="bottom" :width="350" trigger="click">
+            <template #reference>
+              <el-badge style="margin-right: 10px" is-dot :hidden="!notification.length">
+                <div class="notification">
+                  <el-icon><Bell></Bell></el-icon>
+                  <div style="font-size: 12px">消息</div>
+                </div>
+              </el-badge>
+            </template>
+            <el-empty :image-size="80" description="展示没有消息" v-if="!notification.length"/>
+            <el-scrollbar :max-height="500" v-else>
+              <lite-card v-for="item in notification" class="notification-item"
+                         @click="confirmNotification(item.id, item.url)">
+                <div>
+                  <el-tag :type="item.type">消息</el-tag> &nbsp;
+                  <span style="font-weight: bold">{{item.title}}</span>
+                </div>
+                <el-divider style="margin: 5px 0"></el-divider>
+                <div style="font-size: 13px; color: grey">
+                  {{item.content}}
+                </div>
+              </lite-card>
+              <div style="margin-top: 10px">
+                <el-button size="small" type="info" :icon="Check" @click="deleteAllNotification"
+                           style="width: 100%" plain>清除全部消息</el-button>
+              </div>
+            </el-scrollbar>
+          </el-popover>
           <div class="profile">
             <div>{{store.user.username}}</div>
             <div>{{store.user.email}}</div>
@@ -180,6 +229,24 @@ get("/api/user/info", (data)=> {
 </template>
 
 <style lang="less" scoped>
+.notification-item{
+  transition: .3s;
+  &:hover{
+    cursor: pointer;
+    opacity: 0.7;
+  }
+}
+.notification{
+  font-size: 22px;
+  line-height: 14px;
+  text-align: center;
+  transition: color 0.3s;
+
+  &:hover{
+    cursor: pointer;
+    color: grey;
+  }
+}
 .main-content {
   height: 100vh;
   width: 100vw;

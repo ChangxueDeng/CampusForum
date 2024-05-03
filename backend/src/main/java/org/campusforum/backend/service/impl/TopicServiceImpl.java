@@ -17,6 +17,7 @@ import org.campusforum.backend.entity.vo.response.TopicDetailVo;
 import org.campusforum.backend.entity.vo.response.TopicPreviewVO;
 import org.campusforum.backend.entity.vo.response.TopicTopVO;
 import org.campusforum.backend.mapper.*;
+import org.campusforum.backend.service.NotificationService;
 import org.campusforum.backend.service.TopicService;
 import org.campusforum.backend.utils.CacheUtils;
 import org.campusforum.backend.utils.Const;
@@ -49,6 +50,8 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
     AccountPrivacyMapper accountPrivacyMapper;
     @Resource
     TopicCommentMapper topicCommentMapper;
+    @Resource
+    NotificationService notificationService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
@@ -289,6 +292,28 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         comment.setTime(new Date());
         comment.setQuote(vo.getQuote());
         topicCommentMapper.insert(comment);
+        Topic topic = this.getById(vo.getTid());
+        Account account = accountMapper.selectById(uid);
+        if (vo.getQuote() > 0) {
+            TopicComment comment1 = topicCommentMapper.selectById(vo.getQuote());
+            if (!Objects.equals(account.getId(), comment1.getUid())) {
+                notificationService.addNotification(
+                        comment1.getUid(),
+                        "您在帖子" + topic.getTitle() + "中的评论被回复",
+                        account.getUsername() + "回复了你发表的评论，请查看",
+                        "success",
+                        "/index/topic-detail/" + topic.getId()
+                );
+            }
+        } else if (!Objects.equals(account.getId(), topic.getUid())) {
+            notificationService.addNotification(
+                    topic.getUid(),
+                    "您发表的帖子被评论",
+                    account.getUsername() + "评论了你发表的帖子: " + topic.getTitle() + "，请查看",
+                    "success",
+                    "/index/topic-detail/" + topic.getId()
+            );
+        }
         return null;
     }
 
