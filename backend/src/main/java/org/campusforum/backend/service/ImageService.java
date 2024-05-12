@@ -39,4 +39,5 @@ public interface ImageService extends IService<ImageStore> {
      * @throws Exception 异常
      */
     void fetchImageFromMinio(OutputStream stream, String image) throws Exception;
+    void deleteCache(String name) throws Exception;
 }

@@ -2,9 +2,18 @@
 import {useRoute} from "vue-router";
 import {get, post} from "@/net/net.js"
 import {reactive, ref} from "vue";
-import axios from "axios";
-import {ArrowLeft, ChatSquare, CircleCheck, Delete, EditPen, Female, Male, Plus, Star} from "@element-plus/icons-vue";
-import {computed} from "vue";
+import {
+  ArrowLeft,
+  ChatSquare,
+  CircleCheck, CloseBold,
+  Delete,
+  EditPen,
+  Female, InfoFilled,
+  Male,
+  Plus,
+  Select,
+  Star, Warning
+} from "@element-plus/icons-vue";
 import {QuillDeltaToHtmlConverter} from "quill-delta-to-html";
 import Card from "@/components/Card.vue";
 import {router} from "@/router/index.js";
@@ -18,7 +27,7 @@ import TopicCommentEditor from "@/components/TopicCommentEditor.vue";
 const route = useRoute()
 const editorShow = ref(false)
 const commentEditorShow = ref(false)
-const tid = route.params.tid
+const tid = Number.parseInt(route.params.tid)
 const store = useStore()
 const topicUpdate = ref(false)
 const topic = reactive({
@@ -41,14 +50,22 @@ function convert2Html(content){
 
 function init() {
   get(`api/forum/topic?tid=${tid}`, (data) => {
-    topic.data = data
-    topic.like = data.interact.like
-    topic.collect = data.interact.collect
-    loadComments(1)
+    if(data.ban) {
+      ElMessage.error("帖子已被封禁")
+      router.go(-1)
+    } else {
+      topic.data = data
+      topic.like = data.interact.like
+      topic.collect = data.interact.collect
+      topic.ban = data.ban
+      loadComments(1)
+    }
+  },(message)=> {
+    ElMessage.error(message)
+    setInterval(()=>router.go(-1),500)
   })
 }
 init()
-
 function update(editor, emit) {
   post('api/forum/update-topic', {
     id: tid,
@@ -91,14 +108,44 @@ function deleteComment(cid) {
     loadComments(topic.page)
   })
 }
+function following(targetId, state, finish) {
+  get(`api/forum/follow-user?targetId=${targetId}&state=${state}`,()=> {
+    ElMessage.success(state ? '关注成功' : '取消关注成功')
+    finish()
+    updateCommentFollow(targetId)
+  })
+}
 
+function updateCommentFollow(targetId) {
+  //遍历评论列表
+  for (let i = 0; i < topic.comments.length; i++) {
+    if (topic.comments[i].user.id === targetId) {
+      topic.comments[i].followed = !topic.comments[i].followed
+    }
+  }
+}
+function returnForm() {
+    if (route.query.from === 'search' || route.query.from === 'space') {
+      router.back()
+    }else {
+      router.push('/index')
+    }
+}
+function deleteTopic() {
+  get(`api/forum/delete-topic?id=${tid}`, ()=> {
+    ElMessage.success("删除帖子成功")
+    router.push('/index')
+  }, (message)=> {
+    ElMessage.error(message)
+  })
+}
 </script>
 
 <template>
   <div class="topic-page" v-if="topic.data">
     <div class="topic-main" style="position: sticky; top: 0; z-index: 10">
       <card style="display: flex; width: 100%">
-        <el-button :icon="ArrowLeft" size="small" plain round @click="router.push('/index')">返回列表</el-button>
+        <el-button :icon="ArrowLeft" size="small" plain round @click="returnForm">返回列表</el-button>
 
         <div style="text-align: center; flex: 1; font-weight: bold">
           <topic-tag style="margin-right: 5px; translate: 0 -2px" :type="topic.data.type"></topic-tag>
@@ -108,7 +155,17 @@ function deleteComment(cid) {
     </div>
     <div class="topic-main">
       <div class="topic-main-left">
-        <el-avatar :src="store.avatarUserUrl(topic.data.user.avatar)" :size="60"></el-avatar>
+        <div v-if="store.user.id !== topic.data.user.id" style="margin-bottom: 5px">
+          <el-tooltip :content="topic.data.followed ? '取消关注' : '关注'">
+            <el-tag :type="topic.data.followed ? 'danger' : 'primary'"
+                    @click="following(topic.data.user.id, !topic.data.followed, ()=> {topic.data.followed = !topic.data.followed})">
+              <el-icon v-if="!topic.data.followed" class="interact-item"><Select/></el-icon>
+              <el-icon v-else class="interact-item"><CloseBold/></el-icon>
+            </el-tag>
+          </el-tooltip>
+        </div>
+        <el-avatar :src="store.avatarUserUrl(topic.data.user.avatar)" :size="60"
+                   @click="router.push(`/index/space/${topic.data.user.id}`)"></el-avatar>
         <div>
           <div style="font-size: 18px; font-weight: bold">
             {{topic.data.user.username}}
@@ -149,6 +206,20 @@ function deleteComment(cid) {
                             @click="interact('collect', '收藏')">
             <el-icon style="translate: 0 3px"><Star/></el-icon>
           </interact-button>
+          <el-popconfirm v-if="store.user.id === topic.data.user.id"
+                         cancel-button-text="取消"
+                         confirm-button-text="确定"
+                         :icon="InfoFilled"
+                         @confirm="deleteTopic()"
+                         icon-color="#626AEF"
+                         title="确认删除吗？">
+            <template #reference>
+              <interact-button name="删除帖子" style="margin-left: 20px;" color="red"
+                               v-if="store.user.id === topic.data.user.id">
+                <el-icon style="translate: 0 3px"><Warning/></el-icon>
+              </interact-button>
+            </template>
+          </el-popconfirm>
         </div>
       </div>
     </div>
@@ -156,18 +227,27 @@ function deleteComment(cid) {
       <div v-if="topic.comments">
         <div class="topic-main" style="margin-top: 10px" v-for="item in topic.comments">
           <div class="topic-main-left">
-            <el-avatar :src="store.avatarUserUrl(item.user.avatar)" :size="60"></el-avatar>
+            <div v-if="store.user.id !== item.user.id" style="margin-bottom: 5px">
+              <el-tooltip :content="item.followed ? '取消关注' : '关注'">
+                <el-tag :type="item.followed ? 'danger' : 'primary'"
+                        @click="following(item.user.id, !item.followed)">
+                  <el-icon v-if="!item.followed" class="interact-item"><Select/></el-icon>
+                  <el-icon v-else class="interact-item"><CloseBold/></el-icon>
+                </el-tag>
+              </el-tooltip>
+            </div>
+            <el-avatar :src="store.avatarUserUrl(item.user.avatar)" :size="60" @click="router.push(`/index/space/${item.user.id}`)"></el-avatar>
             <div>
               <div style="font-size: 18px; font-weight: bold">
-                {{topic.data.user.username}}
-                <span style="color: hotpink;" v-if="topic.data.user.gender === 1" >
+                {{item.user.username}}
+                <span style="color: hotpink;" v-if="item.user.gender === 1" >
               <el-icon><Female/></el-icon>
             </span>
-                <span style="color: dodgerblue;" v-if="topic.data.user.gender === 0">
+                <span style="color: dodgerblue;" v-if="item.user.gender === 0">
               <el-icon><Male/></el-icon>
             </span>
               </div>
-              <div class="desc">{{topic.data.user.email}}</div>
+              <div class="desc">{{item.user.email}}</div>
             </div>
             <el-divider style="margin: 10px 0"></el-divider>
             <div style="text-align: left; margin: 0 5px;">
@@ -186,15 +266,15 @@ function deleteComment(cid) {
             <div v-if="item.quote" class="comment-quote">
               回复: {{item.quote}}
             </div>
-            <div class="topic-content" v-html="convert2Html(item.content)"></div>
+            <div class="topic-content" v-if="!item.ban" v-html="convert2Html(item.content)"></div>
+            <el-alert v-if="item.ban" style="margin-top: 10px;" type="error" :closable = "false">此评论已被封禁</el-alert>
             <div style="text-align: right">
               <el-link :icon="ChatSquare" @click="commentEditorShow = true; comment.quote = item"
-                       type="info">&nbsp;回复评论</el-link>
+                       type="info" v-if="!item.ban">&nbsp;回复评论</el-link>
               <el-link :icon="Delete" type="danger" v-if="item.user.id === store.user.id"
                        style="margin-left: 20px" @click="deleteComment(item.id)">&nbsp;删除评论</el-link>
             </div>
           </div>
-
         </div>
         <div style="width: fit-content; margin: 20px auto">
           <el-pagination
@@ -222,6 +302,13 @@ function deleteComment(cid) {
 </template>
 
 <style scoped>
+.interact-item{
+  &:hover{
+    cursor: pointer;
+    scale: 1.1;
+    font-weight: bold;
+  }
+}
 .comment-quote{
   font-size: 13px;
   color: grey;
@@ -273,7 +360,7 @@ function deleteComment(cid) {
     }
   }
   .topic-main-right{
-    width: 600pc;
+    width: 600px;
     padding: 10px 20px;
     display: flex;
     flex-direction: column;

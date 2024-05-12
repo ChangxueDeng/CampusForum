@@ -7,10 +7,12 @@ import java.util.Date;
 @Data
 public class CommentVO {
     private Integer id;
-    private String Content;
+    private String content;
     private Date time;
     private String quote;
     private User user;
+    private Boolean ban;
+    private Boolean followed;
     @Data
     public static class User {
         private Integer id;

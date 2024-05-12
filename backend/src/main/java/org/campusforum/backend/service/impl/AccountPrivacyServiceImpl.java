@@ -18,7 +18,8 @@ import java.util.Optional;
 public class AccountPrivacyServiceImpl extends ServiceImpl<AccountPrivacyMapper, AccountPrivacy> implements AccountPrivacyService {
     @Override
     public void savePrivacy(int id, PrivacySaveVO vo) {
-        AccountPrivacy accountPrivacy = Optional.ofNullable(this.getById(id)).orElse(new AccountPrivacy(id));
+        AccountPrivacy accountPrivacy = Optional.ofNullable(this.getById(id)).orElse(new AccountPrivacy());
+        accountPrivacy.setId(id);
         boolean status = vo.getStatus();
         switch (vo.getType()) {
             case "gender" -> accountPrivacy.setGender(status);
@@ -35,7 +36,8 @@ public class AccountPrivacyServiceImpl extends ServiceImpl<AccountPrivacyMapper,
         AccountPrivacy accountPrivacy = getById(id);
         //如果为空时写入
         if (accountPrivacy == null) {
-            AccountPrivacy creatPrivacy = new AccountPrivacy(id);
+            AccountPrivacy creatPrivacy = new AccountPrivacy();
+            creatPrivacy.setId(id);
             log.error(creatPrivacy.toString());
             this.save(creatPrivacy);
             return creatPrivacy;

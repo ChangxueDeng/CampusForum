@@ -18,4 +18,5 @@ public class AuthorizeVO {
     private String role;
     private String token;
     private Date expire;
+    private Boolean ban;
 }

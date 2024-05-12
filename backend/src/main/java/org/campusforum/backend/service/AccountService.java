@@ -6,6 +6,11 @@ import org.campusforum.backend.entity.vo.request.ChangePasswordVO;
 import org.campusforum.backend.entity.vo.request.RegisterVO;
 import org.campusforum.backend.entity.vo.request.ResetConfirmVO;
 import org.campusforum.backend.entity.vo.request.ResetPasswordVO;
+import org.campusforum.backend.entity.vo.response.AccountListVO;
+import org.campusforum.backend.entity.vo.response.FollowVO;
+import org.campusforum.backend.entity.vo.response.SpaceVO;
+
+import java.util.List;
 
 /**
  * 用户的方法
@@ -72,4 +77,5 @@ public interface AccountService extends IService<Account> {
       * @return {@link String}
       */
      String changePassword(int id, ChangePasswordVO vo);
+
 }

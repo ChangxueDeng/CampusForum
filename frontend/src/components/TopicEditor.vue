@@ -192,7 +192,7 @@ const contentLength = computed(()=> deltaToText(editor.text).length)
 <template>
   <div>
     <el-drawer :model-value="show" direction="btt"
-               :size="650" width="200px"
+               :size="650"
                :close-on-click-modal="false"
                @close="emit('close')"
                @open="initEditor()">
@@ -240,7 +240,7 @@ const contentLength = computed(()=> deltaToText(editor.text).length)
   </div>
 </template>
 
-<style scoped>
+<style lang="less" scoped>
 :deep(.el-drawer) {
   margin: auto;
   width: 800px;
@@ -248,5 +248,24 @@ const contentLength = computed(()=> deltaToText(editor.text).length)
 }
 :deep(.el-drawer__header) {
   margin: 0;
+}
+:deep(.el-drawer).btt{
+    width: 800px;
+}
+
+.ql-toolbar {
+  border-radius: 5px 5px 0 0;
+  border-color: var(--el-border-color) !important;
+}
+.ql-container {
+  border-radius: 0 0 5px 5px;
+  border-color: var(--el-border-color) !important;
+}
+.ql-editor.ql-blank::before {
+  color: var(--el-text-color-placeholder) !important;
+  font-style: normal !important;
+}
+.ql-editor{
+  font-size: 15px;
 }
 </style>

@@ -5,6 +5,7 @@ import {Lock, Setting, Switch} from "@element-plus/icons-vue";
 import {reactive,ref} from "vue";
 import {post, get} from "@/net/net.js";
 import {ElMessage} from "element-plus";
+import {useStore} from "@/store/index.js";
 
 const form = reactive({
   password: '',
@@ -82,6 +83,8 @@ function savaPrivacy(type, status){
     saving.value = false;
   })
 }
+const store = useStore()
+store.forumActivate(4)
 </script>
 
 <template>

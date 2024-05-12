@@ -15,6 +15,8 @@ public class TopicDetailVo {
     User user;
     Interact interact;
     Long commentCount;
+    private Boolean ban;
+    private Boolean followed;
     @Data
     public static class User {
         Integer id;

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import org.campusforum.backend.entity.Result;
@@ -18,11 +19,16 @@ import org.campusforum.backend.entity.vo.request.AddCommentVO;
 import org.campusforum.backend.entity.vo.request.CreateTopicVO;
 import org.campusforum.backend.entity.vo.request.UpdateTopicVO;
 import org.campusforum.backend.entity.vo.response.*;
+import org.campusforum.backend.exception.ResourceNotFoundException;
+import org.campusforum.backend.service.AccountService;
+import org.campusforum.backend.service.AnnouncementService;
 import org.campusforum.backend.service.TopicService;
 import org.campusforum.backend.service.WeatherService;
 import org.campusforum.backend.utils.Const;
 import org.campusforum.backend.utils.ControllerUtils;
 import org.campusforum.backend.utils.StatusUtils;
+import org.hibernate.validator.constraints.Length;
+import org.simpleframework.xml.core.Validate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +52,10 @@ public class ForumController {
     TopicService topicService;
     @Resource
     ControllerUtils controllerUtils;
+    @Resource
+    AnnouncementService announcementService;
+    @Resource
+    AccountService accountService;
     /**
      * 获取天气信息
      * @param longitude 经度
@@ -126,7 +136,7 @@ public class ForumController {
      * @return 返回一个结果对象，其中包含帖子的详细信息。如果操作成功，结果对象的状态为成功；如果操作失败，结果对象的状态为失败，并提供错误信息。
      */
     @GetMapping("/topic")
-    public Result<TopicDetailVo> topic(@RequestParam @Min(0) int tid, @RequestAttribute(Const.USER_ID) int id) {
+    public Result<TopicDetailVo> topic(@RequestParam @Min(0) int tid, @RequestAttribute(Const.USER_ID) int id) throws ResourceNotFoundException {
         // 调用topicService获取指定主题的详细信息，并将结果封装成Result对象返回
         return Result.success(topicService.getTopicDetail(tid, id));
     }
@@ -194,12 +204,49 @@ public class ForumController {
     }
     @GetMapping("/comments")
     public Result<List<CommentVO>> comments(@RequestParam @Min(0) int tid,
-                                            @RequestParam @Min(0) int page) {
-        return Result.success(topicService.listComments(tid, page));
+                                            @RequestParam @Min(0) int page,
+                                            @RequestAttribute(Const.USER_ID) int id) {
+        return Result.success(topicService.listComments(tid, page, id));
     }
     @GetMapping("/delete-comment")
     public Result<Void> deleteComment(@RequestParam @Min(0) int cid,
                                       @RequestAttribute(Const.USER_ID) int id) {
         return controllerUtils.messageHandler(() -> topicService.deleteComment(cid, id));
+    }
+    @GetMapping("/announcements")
+    public Result<List<AnnouncementVO>> announcement() {
+        return Result.success(announcementService.listAnnouncements());
+    }
+    @GetMapping("/space")
+    public Result<SpaceVO> space(@RequestParam("id") int id,
+                                 @RequestAttribute(Const.USER_ID) int uid) {
+        return Result.success(topicService.getSpace(id, uid));
+    }
+    @GetMapping("/space-topics")
+    public Result<List<SpaceTopicVO>> spaceTopics(@RequestParam("page") @Min(1) int page,
+                                                  @RequestParam("id") int id) {
+        return Result.success(topicService.listSpaceTopicByPage(page, id));
+    }
+    @GetMapping("/space-follows")
+    public Result<List<FollowVO>> spaceFollows(@RequestParam("type") @Min(0) @Max(1) int type,
+                                               @RequestParam("id") int id) {
+        return type == 0 ? Result.success(topicService.getFollows(id)) : Result.success(topicService.getFans(id));
+    }
+    @GetMapping("/follow-user")
+    public Result<Void> followUser(@RequestParam("targetId") int targetId,
+                                   @RequestParam("state") boolean state,
+                                   @RequestAttribute(Const.USER_ID) int id) {
+        return controllerUtils.messageHandler(()-> topicService.followUser(new Interact(targetId, id, "follow", new Date()), state));
+    }
+    @GetMapping("/search-topic")
+    public Result<List<TopicPreviewVO>> searchTopic(@RequestParam("keyword") @Length(min = 1,max = 10) String keyword,
+                                                    @RequestParam("page") int page,
+                                                    @RequestParam("type") int type) {
+        return Result.success(topicService.listSearchTopics(keyword, page, type));
+    }
+    @GetMapping("delete-topic")
+    public Result<Void> deleteTopic(@RequestParam("id") int id,
+                                    @RequestAttribute(Const.USER_ID) int uid) {
+        return controllerUtils.messageHandler(() -> topicService.deleteTopic(id, uid));
     }
 }

@@ -22,7 +22,7 @@ public class AccountDetails {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     @TableField
-    private int gender;
+    private Integer gender;
     @TableField
     private String phone;
     @TableField

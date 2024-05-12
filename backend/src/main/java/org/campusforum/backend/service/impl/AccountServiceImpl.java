@@ -1,21 +1,27 @@
 package org.campusforum.backend.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.campusforum.backend.entity.dto.Account;
 import org.campusforum.backend.entity.dto.AccountDetails;
+import org.campusforum.backend.entity.dto.AccountFollows;
 import org.campusforum.backend.entity.dto.AccountPrivacy;
 import org.campusforum.backend.entity.vo.request.ChangePasswordVO;
 import org.campusforum.backend.entity.vo.request.RegisterVO;
 import org.campusforum.backend.entity.vo.request.ResetConfirmVO;
 import org.campusforum.backend.entity.vo.request.ResetPasswordVO;
-import org.campusforum.backend.mapper.AccountDetailsMapper;
-import org.campusforum.backend.mapper.AccountMapper;
-import org.campusforum.backend.mapper.AccountPrivacyMapper;
+import org.campusforum.backend.entity.vo.response.AccountDetailsVO;
+import org.campusforum.backend.entity.vo.response.AccountListVO;
+import org.campusforum.backend.entity.vo.response.FollowVO;
+import org.campusforum.backend.entity.vo.response.SpaceVO;
+import org.campusforum.backend.mapper.*;
 import org.campusforum.backend.service.AccountService;
 import org.campusforum.backend.utils.Const;
 import org.campusforum.backend.utils.FlowUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,10 +30,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,6 +53,10 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     AccountDetailsMapper accountDetailsMapper;
     @Resource
     PasswordEncoder passwordEncoder;
+    @Resource
+    AccountFollowsMapper accountFollowsMapper;
+    @Resource
+    TopicMapper topicMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -102,7 +109,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      */
     private boolean isLimitedEmail(String ip){
         String key = Const.LIMIT_EMAIL + ip;
-        if (!flowUtils.limitOnce(key, 60)) return true;
+        if (flowUtils.limitOnce(key, 60)) return true;
         return false;
     }
 
@@ -120,10 +127,12 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
             return "电子邮件地址已存在";
         if (existAccountByUsername(username))
             return "用户名已被占用";
-        Account account = new Account(null, username, password, email, "user", new Date(),null);
+        Account account = new Account(null, username, password, email, "user", new Date(),null, false);
         this.save(account);
         stringRedisTemplate.delete(Const.LIMIT_EMAIL_DATA + email);
-        accountPrivacyMapper.insert(new AccountPrivacy(account.getId()));
+        AccountPrivacy accountPrivacy = new AccountPrivacy();
+        accountPrivacy.setId(account.getId());
+        accountPrivacyMapper.insert(accountPrivacy);
         AccountDetails accountDetails = new AccountDetails();
         accountDetails.setId(account.getId());
         accountDetailsMapper.insert(accountDetails);
@@ -218,5 +227,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     private String getEmailVerify(String key) {
         return stringRedisTemplate.opsForValue().get(key);
     }
+
+
 
 }

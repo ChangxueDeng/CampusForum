@@ -18,4 +18,5 @@ public class TopicPreviewVO {
     String avatar;
     int like;
     int collect;
+    boolean ban;
 }

@@ -31,4 +31,8 @@ public class Topic {
     private Date time;
     @TableField
     private Integer uid;
+    @TableField
+    private boolean ban;
+    @TableField
+    private boolean top;
 }

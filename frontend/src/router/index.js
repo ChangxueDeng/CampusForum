@@ -1,5 +1,7 @@
 import {createRouter, createWebHistory} from "vue-router";
 import {unAuthorized} from "@/net/net.js";
+import {useStore} from "@/store/index.js";
+
 
 const routes = [
     {
@@ -31,7 +33,7 @@ const routes = [
         children: [
             {
                 path:'',
-                name: 'topics',
+                name: 'forum',
                 component: ()=> import("@/views/forum/Forum.vue"),
                 children: [
                     {
@@ -43,6 +45,16 @@ const routes = [
                         path: 'topic-detail/:tid',
                         name: 'topic-detail',
                         component: ()=> import('@/views/forum/TopicDetailPage.vue')
+                    },
+                    {
+                        path: 'space/:id',
+                        name: 'space',
+                        component: () => import('@/views/forum/SpacePage.vue')
+                    },
+                    {
+                        path: 'search',
+                        name: 'search',
+                        component: ()=> import('@/views/forum/SearchListPage.vue')
                     }
                 ]
             },
@@ -57,6 +69,45 @@ const routes = [
                 component: ()=> import('@/views/index/PrivacySetting.vue')
             },
 
+
+
+        ]
+    },
+    {
+        path: '/admin',
+        name: 'admin',
+        component: ()=> import('@/views/AdminPage.vue'),
+        children: [
+            {
+                path: '',
+                name: 'overview',
+                component: ()=> import('@/views/admin/OverviewPage.vue')
+            },
+            {
+                path: 'topic-manage',
+                name: 'topic-manage',
+                component: ()=> import('@/views/admin/TopicManagePage.vue')
+            },
+            {
+                path: 'user-manage',
+                name: 'user-manage',
+                component: ()=> import('@/views/admin/UserManagePage.vue')
+            },
+            {
+                path: 'notice-manage',
+                name: 'notice-manage',
+                component: ()=> import('@/views/admin/NoticeManagePage.vue')
+            },
+            {
+                path: 'comment-manage',
+                name: 'comment-manage',
+                component: () => import('@/views/admin/CommentManagePage.vue')
+            },
+            {
+                path: 'announcement-manage',
+                name: 'announcement-manage',
+                component: () => import('@/views/admin/AnnouncementManagePage.vue')
+            }
         ]
     }
 ]
@@ -68,13 +119,25 @@ const router = createRouter({
 
 
 router.beforeEach((to, from, next) =>{
-    const isAuthorized = unAuthorized();
-    if(to.name.startsWith('welcome-') && !isAuthorized){
+    const isNotAuthorized = unAuthorized();
+    const store = useStore()
+    if(to.name.startsWith('welcome-') && !isNotAuthorized){
         next('/index')
-    }else if(to.fullPath.startsWith('/index') && isAuthorized){
+    }else if(to.fullPath.startsWith('/index') && isNotAuthorized){
+        next('/')
+    }else if (to.fullPath.startsWith('/admin') && store.user.role !== 'admin'){
         next('/')
     }else {
-        next()
+    if (to.name === 'topic-list' || to.name === 'topic-detail') {
+        store.forumActivate(1)
+    }else if (to.name === 'space') {
+        store.forumActivate(2)
+    } else if (to.name === 'user-setting') {
+        store.forumActivate(3)
+    } else if (to.name === 'privacy-setting') {
+        store.forumActivate(4)
+    }
+    next()
     }
 } )
 

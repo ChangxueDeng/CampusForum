@@ -7,16 +7,18 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.campusforum.backend.entity.dto.*;
 import org.campusforum.backend.entity.vo.request.AddCommentVO;
 import org.campusforum.backend.entity.vo.request.CreateTopicVO;
 import org.campusforum.backend.entity.vo.request.UpdateTopicVO;
-import org.campusforum.backend.entity.vo.response.CommentVO;
-import org.campusforum.backend.entity.vo.response.TopicDetailVo;
-import org.campusforum.backend.entity.vo.response.TopicPreviewVO;
-import org.campusforum.backend.entity.vo.response.TopicTopVO;
+import org.campusforum.backend.entity.vo.response.*;
+import org.campusforum.backend.exception.ResourceNotFoundException;
 import org.campusforum.backend.mapper.*;
+import org.campusforum.backend.service.AccountFollowsService;
+import org.campusforum.backend.service.ImageService;
 import org.campusforum.backend.service.NotificationService;
 import org.campusforum.backend.service.TopicService;
 import org.campusforum.backend.utils.CacheUtils;
@@ -25,6 +27,8 @@ import org.campusforum.backend.utils.FlowUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -34,6 +38,7 @@ import java.util.stream.Collectors;
 /**
  * @author ChangxueDeng
  */
+@Slf4j
 @Service
 public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements TopicService {
     @Resource
@@ -53,7 +58,11 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
     @Resource
     NotificationService notificationService;
     @Resource
+    private AccountFollowsMapper accountFollowsMapper;
+    @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private ImageService imageService;
 
     private static final int TOPIC_CONTENT_MAX = 20000;
     private static final int TOPIC_COMMENT_MAX = 2000;
@@ -120,20 +129,45 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         cacheUtils.savaList2Cache(key, list, 60);
         return list;
     }
+    @Override
+    public List<SpaceTopicVO> listSpaceTopicByPage(int pageNumber, int uid) {
+        Page<Topic> topicPage = Page.of(pageNumber, 10);
+        return this.page(topicPage, Wrappers.<Topic>query().eq("uid", uid))
+                .getRecords().stream().map(this::topic2SpaceTopicVO).toList();
+    }
+    private SpaceTopicVO topic2SpaceTopicVO(Topic topic) {
+        SpaceTopicVO vo = new SpaceTopicVO();
+        List<String> images = new ArrayList<>();
+        StringBuilder builder = new StringBuilder();
+        BeanUtils.copyProperties(topic, vo);
+        JSONArray ops = JSONObject.parseObject(topic.getContent()).getJSONArray("ops");
+        this.shortContent(ops, builder, obj -> images.add(obj.toString()));
+        vo.setText(builder.length() > 300 ? builder.substring(0, 300) : builder.toString());
+        vo.setImages(images);
+        vo.setLike(baseMapper.interactCount(topic.getId(), "like"));
+        vo.setCollect(baseMapper.interactCount(topic.getId(), "collect"));
+        return vo;
+    }
     private TopicPreviewVO topic2TopicPreviewVO(Topic topic) {
         TopicPreviewVO vo = new TopicPreviewVO();
-        BeanUtils.copyProperties(topic, vo);
+        if (!topic.isBan()) {
+            BeanUtils.copyProperties(topic, vo);
+            List<String> image = new ArrayList<>();
+            StringBuilder previewText = new StringBuilder();
+            JSONArray ops;
+            ops = JSONObject.parseObject(topic.getContent()).getJSONArray("ops");
+            this.shortContent(ops, previewText, obj -> image.add(obj.toString()));
+            vo.setText(previewText.length() > 300 ? previewText.substring(0, 300) : previewText.toString());
+            vo.setImages(image);
+        } else {
+            vo.setBan(true);
+            BeanUtils.copyProperties(topic, vo, "content");
+        }
         Account account = accountMapper.selectById(topic.getUid());
         vo.setUsername(account.getUsername());
         vo.setAvatar(account.getAvatar());
-        vo.setLike(baseMapper.InteractCount(topic.getId(), "like"));
-        vo.setCollect(baseMapper.InteractCount(topic.getId(), "collect"));
-        List<String> image = new ArrayList<>();
-        StringBuilder previewText = new StringBuilder();
-        JSONArray ops = JSONObject.parseObject(topic.getContent()).getJSONArray("ops");
-        this.shortContent(ops, previewText, obj -> image.add(obj.toString()));
-        vo.setText(previewText.length() > 300 ? previewText.substring(0, 300) : previewText.toString());
-        vo.setImages(image);
+        vo.setLike(baseMapper.interactCount(topic.getId(), "like"));
+        vo.setCollect(baseMapper.interactCount(topic.getId(), "collect"));
         return vo;
     }
 
@@ -157,9 +191,17 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
     }
 
     @Override
-    public TopicDetailVo getTopicDetail(int tid, int uid) {
+    public TopicDetailVo getTopicDetail(int tid, int uid) throws ResourceNotFoundException {
         TopicDetailVo vo = new TopicDetailVo();
         Topic topic = baseMapper.selectById(tid);
+        if (topic == null) {
+            throw new ResourceNotFoundException("帖子不存在");
+        }
+        //如果被封禁则返回设置ban为true，并且直接返回
+        if (topic.isBan()) {
+            vo.setBan(true);
+            return vo;
+        }
         BeanUtils.copyProperties(topic, vo);
         TopicDetailVo.Interact interact = new TopicDetailVo.Interact(
                 hasInteract(tid, uid, "like"),
@@ -169,6 +211,8 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         TopicDetailVo.User user = new TopicDetailVo.User();
         vo.setUser(fillUserDetailsByPrivacy(user, topic.getUid()));
         vo.setCommentCount(topicCommentMapper.selectCount(Wrappers.<TopicComment>query().eq("tid", tid)));
+        //查看是否关注
+         vo.setFollowed(hasInteract(topic.getUid(), uid, "follow"));
         return vo;
     }
     /**
@@ -208,9 +252,17 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
             this.saveInteractSchedule(type);
         }
     }
+    @Override
+    public String followUser(Interact interact, boolean state) {
+        if (!accountMapper.exists(Wrappers.<Account>query().eq("id", interact.getTargetId()))) {
+            return "目标用户不存在";
+        }
+        this.interact(interact, state);
+        return null;
+    }
 
     private final Map<String, Boolean> scheduleState = new HashMap<>();
-    ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+    ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(3);
     private void saveInteractSchedule(String type) {
         if (!scheduleState.getOrDefault(type, false)) {
             scheduleState.put(type, true);
@@ -230,22 +282,40 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
                 } else {
                     uncheck.add(Interact.parseInteract(k.toString(),type));
                 }
-                if (!check.isEmpty()) {
-                    baseMapper.addInteract(check, type);
-                }
-                if (!uncheck.isEmpty()) {
-                    baseMapper.deleteInteract(uncheck, type);
+                if ("like".equals(type) || "collect".equals(type))
+                {
+                    if (!check.isEmpty()) {
+                        log.error("保存like");
+                        baseMapper.addInteract(check, type);
+                    }
+                    if (!uncheck.isEmpty()) {
+                        log.error("删除like");
+                        baseMapper.deleteInteract(uncheck, type);
+                    }
+                }else if ("follow".equals(type)) {
+                    if (!check.isEmpty()) {
+                        log.error("保存follow");
+                        accountFollowsMapper.addFollows(check, type);
+                    }
+                    if (!uncheck.isEmpty()) {
+                        log.error("删除follow");
+                        accountFollowsMapper.deleteFollows(uncheck, type);
+                    }
                 }
                 stringRedisTemplate.delete(type);
             });
         }
     }
-    private boolean hasInteract(int tid, int uid, String type) {
-        String key = tid + ":" + uid;
+    private boolean hasInteract(int targetId, int uid, String type) {
+        String key = targetId + ":" + uid;
         if (stringRedisTemplate.opsForHash().hasKey(type, key)) {
             return Boolean.parseBoolean(stringRedisTemplate.opsForHash().entries(type).get(key).toString());
         }
-        return baseMapper.userInteractCount(tid, uid, type) > 0;
+        if ("follow".equals(type)) {
+            return accountFollowsMapper.exists(Wrappers.<AccountFollows>query()
+                    .eq("follower", targetId).eq("fans",uid));
+        }
+        return baseMapper.userInteractCount(targetId, uid, type) > 0;
     }
 
     @Override
@@ -280,7 +350,18 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
 
     @Override
     public String createComment(AddCommentVO vo, int uid) {
-        if (contentLimit(JSONObject.parseObject(vo.getContent()), TOPIC_COMMENT_MAX)) {
+        Topic topic = this.getById(vo.getTid());
+        if (topic.isBan()) {
+            return "帖子已被封禁，无法发表评论";
+        } else if (vo.getQuote() > 0) {
+            if (!topicCommentMapper.exists(Wrappers.<TopicComment>query().eq("id", vo.getQuote()))) {
+                return "评论已被删除，无法发表评论";
+            } else if (!topicCommentMapper.exists(Wrappers.<TopicComment>query().eq("id", vo.getTid()).eq("tid", vo.getTid()))) {
+                return "不存在这条评论";
+            } else if (topicCommentMapper.selectById(vo.getQuote()).isBan()) {
+                return "评论已被封禁，无法发表评论";
+            }
+        } else if (contentLimit(JSONObject.parseObject(vo.getContent()), TOPIC_COMMENT_MAX)) {
             return "评论内容过多，发表失败";
         } else if (flowUtils.limitCountPeriod(Const.FORUM_TOPIC_COMMENT_COUNT + uid, 60, 2)) {
             return "评论频繁，请稍后再试";
@@ -292,7 +373,6 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         comment.setTime(new Date());
         comment.setQuote(vo.getQuote());
         topicCommentMapper.insert(comment);
-        Topic topic = this.getById(vo.getTid());
         Account account = accountMapper.selectById(uid);
         if (vo.getQuote() > 0) {
             TopicComment comment1 = topicCommentMapper.selectById(vo.getQuote());
@@ -318,23 +398,29 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
     }
 
     @Override
-    public List<CommentVO> listComments(int tid, int page) {
+    public List<CommentVO> listComments(int tid, int page, int id) {
         Page<TopicComment> commentPage = Page.of(page, 10);
         topicCommentMapper.selectPage(commentPage, Wrappers.<TopicComment>query().eq("tid", tid));
         return commentPage.getRecords().stream().map(dto -> {
             CommentVO vo = new CommentVO();
-            BeanUtils.copyProperties(dto, vo);
+            if (dto.isBan()) {
+                vo.setBan(true);
+                BeanUtils.copyProperties(dto, vo, "content");
+            } else {
+                BeanUtils.copyProperties(dto, vo);
+            }
             if(dto.getQuote() > 0) {
-                TopicComment comment = topicCommentMapper.selectOne(Wrappers
-                        .<TopicComment>query()
-                        .eq("id", dto.getQuote())
-                        .orderByAsc("time"));
+                TopicComment comment = topicCommentMapper.selectById(dto.getQuote());
                 if (comment != null) {
-                    JSONObject object = JSONObject.parseObject(comment.getContent());
-                    StringBuilder builder = new StringBuilder();
-                    this.shortContent(object.getJSONArray("ops"), builder, ignore -> {} );
-                    vo.setQuote(builder.toString());
-                } else {
+                    if (comment.isBan()) {
+                        vo.setQuote("此评论已被封禁");
+                    } else {
+                        JSONObject object = JSONObject.parseObject(comment.getContent());
+                        StringBuilder builder = new StringBuilder();
+                        this.shortContent(object.getJSONArray("ops"), builder, ignore -> {} );
+                        vo.setQuote(builder.toString());
+                    }
+                }else {
                     vo.setQuote("此评论已被删除");
                 }
 
@@ -342,6 +428,8 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
             CommentVO.User user = new CommentVO.User();
             this.fillUserDetailsByPrivacy(user, dto.getUid());
             vo.setUser(user);
+            //查看是否关注发布评论者
+            vo.setFollowed(this.hasInteract(dto.getUid(), id, "follow"));
             return vo;
         }).toList();
     }
@@ -350,10 +438,97 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
     public String deleteComment(int cid, int uid) {
         try {
             topicCommentMapper.delete(Wrappers.<TopicComment>query().eq("id", cid).eq("uid", uid));
-
         } catch (Exception e) {
             return "操作错误";
         }
+        return null;
+    }
+
+    @Override
+    public SpaceVO getSpace(int id, int uid) {
+        //获取用户基本信息
+        Account account = accountMapper.selectById(id);
+        if (account == null) {
+            return null;
+        }
+        SpaceVO vo = new SpaceVO();
+        vo.setId(account.getId());
+        vo.setUsername(account.getUsername());
+        vo.setAvatar(account.getAvatar());
+        //获取详细信息
+        AccountDetails accountDetails = accountDetailsMapper.selectById(id);
+        if (accountPrivacyMapper.selectById(id).isGender()) {
+            vo.setGender(accountDetails.getGender());
+        }
+        vo.setDesc(accountDetails.getDesc());
+        //获取关注数
+        vo.setFollow(accountFollowsMapper.selectCount(Wrappers.<AccountFollows>query().eq("fans", id)));
+        //获取粉丝数
+        vo.setFans(accountFollowsMapper.selectCount(Wrappers.<AccountFollows>query().eq("follower", id)));
+        //获取获得的点赞数
+        vo.setLike(baseMapper.userGetLikeCount(id));
+        vo.setFollowed(this.hasInteract(id, uid, "follow"));
+        return vo;
+    }
+
+    @Override
+    public List<FollowVO> getFollows(int id) {
+        return accountFollowsMapper.selectList(Wrappers.<AccountFollows>query().eq("fans", id)).stream().map(f -> {
+            Account account = accountMapper.selectById(f.getFollower());
+            AccountDetails details = accountDetailsMapper.selectById(f.getFollower());
+            return new FollowVO(account.getId(), account.getUsername(), account.getAvatar(), details.getGender());
+        }).toList();
+    }
+
+    @Override
+    public List<FollowVO> getFans(int id) {
+        return accountFollowsMapper.selectList(Wrappers.<AccountFollows>query().eq("follower", id)).stream().map(f -> {
+            Account account = accountMapper.selectById(f.getFans());
+            AccountDetails details = accountDetailsMapper.selectById(f.getFans());
+            return new FollowVO(account.getId(), account.getUsername(), account.getAvatar(), details.getGender());
+        }).toList();
+    }
+
+    @Override
+    public List<TopicPreviewVO> listSearchTopics(String keyword, int page, int type) {
+        Page<Topic> topicPage = Page.of(page, 10);
+        if (type == 0) {
+            this.page(topicPage, Wrappers.<Topic>query().like("title", keyword));
+        } else {
+            this.page(topicPage, Wrappers.<Topic>query().eq("type", type).like("title", keyword));
+        }
+        return topicPage.getRecords().stream().map(this::topic2TopicPreviewVO).toList();
+    }
+
+    @Override
+    public String deleteTopic(int id, int uid) {
+        Topic topic = this.getOne(Wrappers.<Topic>query().eq("id", id).eq("uid", uid));
+        if (topic == null) {
+            return "帖子不存在或无权限";
+        }
+        //删除关联评论
+        topicCommentMapper.delete(Wrappers.<TopicComment>query().eq("tid", id));
+        //删除相关点赞和收藏
+        baseMapper.deleteInteractByTid(id, "like");
+        baseMapper.deleteInteractByTid(id, "collect");
+        //获取帖子中的图片
+        List<String> images = new ArrayList<>();
+        JSONArray ops = JSONObject.parseObject(topic.getContent()).getJSONArray("ops");
+        for (Object object : ops) {
+            JSONObject op = JSONObject.from(object);
+            if (op.containsKey("insert") && op.get("insert") instanceof JSONObject img) {
+                images.add(img.getString("image"));
+            }
+        }
+        images.forEach(i -> {
+            try {
+                imageService.deleteCache(i);
+            } catch (Exception e) {
+                log.warn("删除图片错误:{}", e.getMessage());
+            }
+        });
+        //删除帖子
+        this.remove(Wrappers.<Topic>query().eq("id", id).eq("uid", uid));
         return null;
     }
 }

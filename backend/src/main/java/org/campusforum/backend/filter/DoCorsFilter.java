@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.campusforum.backend.utils.Const;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,8 @@ import java.io.IOException;
 @Component
 @Order(Const.ORDER_FILTER_CORS)
 public class DoCorsFilter extends HttpFilter {
+    @Value("${spring.security.cors.allowed-origins}")
+    private String allowedOrigins;
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         this.cors(response);
@@ -26,7 +29,7 @@ public class DoCorsFilter extends HttpFilter {
 
     private void cors(HttpServletResponse response) throws ServletException, IOException {
         //允许发起跨域请求的源
-        response.addHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+        response.addHeader("Access-Control-Allow-Origin", allowedOrigins);
         //允许发起跨域请求的方法
         response.addHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");
         //允许跨域请求提交哪些 Header

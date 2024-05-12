@@ -7,10 +7,8 @@ import org.campusforum.backend.entity.dto.TopicType;
 import org.campusforum.backend.entity.vo.request.AddCommentVO;
 import org.campusforum.backend.entity.vo.request.CreateTopicVO;
 import org.campusforum.backend.entity.vo.request.UpdateTopicVO;
-import org.campusforum.backend.entity.vo.response.CommentVO;
-import org.campusforum.backend.entity.vo.response.TopicDetailVo;
-import org.campusforum.backend.entity.vo.response.TopicPreviewVO;
-import org.campusforum.backend.entity.vo.response.TopicTopVO;
+import org.campusforum.backend.entity.vo.response.*;
+import org.campusforum.backend.exception.ResourceNotFoundException;
 
 import java.util.List;
 /**
@@ -58,7 +56,7 @@ public interface TopicService extends IService<Topic> {
      * @param uid 用户id
      * @return {@link TopicDetailVo}
      */
-    TopicDetailVo getTopicDetail(int tid, int uid);
+    TopicDetailVo getTopicDetail(int tid, int uid) throws ResourceNotFoundException;
 
     /**
      * 用户互动
@@ -82,6 +80,13 @@ public interface TopicService extends IService<Topic> {
      * @return {@link String}
      */
     String createComment(AddCommentVO vo, int uid);
-    List<CommentVO> listComments(int tid, int page);
+    List<CommentVO> listComments(int tid, int page, int id);
     String deleteComment(int cid, int uid);
+    public List<SpaceTopicVO> listSpaceTopicByPage(int pageNumber, int uid);
+    String followUser(Interact interact, boolean state);
+    SpaceVO getSpace(int id, int uid);
+    List<FollowVO> getFollows(int id);
+    List<FollowVO> getFans(int id);
+    List<TopicPreviewVO> listSearchTopics(String keyword, int page, int type);
+    String deleteTopic(int id, int uid);
 }

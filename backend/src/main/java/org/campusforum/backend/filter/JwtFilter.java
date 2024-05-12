@@ -27,7 +27,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String headToken = request.getHeader(Const.HEAD_TOKEN);
-        if (headToken != null) {
+        if (headToken != null && !jwtUtils.checkJwtTokenExpired(headToken)) {
             //进行jwt校验
             DecodedJWT decodedJwt = jwtUtils.decodedJwtToken(headToken);
             //将token内容转换为User

@@ -17,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -42,6 +43,7 @@ import java.util.Date;
  */
 @EnableWebSecurity
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     @Resource
@@ -123,11 +125,13 @@ public class SecurityConfiguration {
                 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
                 Account account = accountServiceImpl.findAccountByUsernameOrEmail(user.getUsername());
                 AuthorizeVO authorizeVO = new AuthorizeVO();
-                //创建jwt令牌
-                String token = jwtUtils.createJwtToken(user, account.getUsername(), account.getId());
-                Date expire = jwtUtils.createExpireTime();
-                authorizeVO.setToken(token);
-                authorizeVO.setExpire(expire);
+                //如果未被封禁才创建令牌
+                if (!account.isBan()) {
+                    String token = jwtUtils.createJwtToken(user, account.getUsername(), account.getId());
+                    Date expire = jwtUtils.createExpireTime();
+                    authorizeVO.setToken(token);
+                    authorizeVO.setExpire(expire);
+                }
                 BeanUtils.copyProperties(account, authorizeVO);
                 response.getWriter().write(Result.success(authorizeVO,"登录成功").toJsonString());
             }

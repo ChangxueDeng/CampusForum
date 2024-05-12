@@ -107,6 +107,9 @@ public class JwtUtils {
                 .authorities(claimMap.get("authorities").asArray(String.class))
                 .build();
     }
+    public boolean checkJwtTokenExpired(String hearderToken) {
+        return !checkJwtToken(hearderToken) || JWT.decode(hearderToken.substring(7)).getExpiresAt().before(new Date());
+    }
 
     public String getId(DecodedJWT decodedJWT) {
         Map<String, Claim> map = decodedJWT.getClaims();

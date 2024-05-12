@@ -17,7 +17,7 @@ import {
 import Weather from "@/components/Weather.vue";
 import {computed, reactive, ref, watch} from "vue";
 import {get} from "@/net/net.js";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import TopicEditor from "@/components/TopicEditor.vue";
 import {useStore} from "@/store/index.js";
 import axios from "axios";
@@ -25,6 +25,7 @@ import ColorDot from "@/components/ColorDot.vue";
 import {router} from "@/router/index.js";
 import TopicTag from "@/components/TopicTag.vue";
 import TopicCollectList from "@/components/TopicCollectList.vue";
+
 const today = computed(()=> {
   const date = new Date()
   return `${date.getFullYear()} 年 ${date.getMonth() + 1 } 月 ${date.getDate()} 日`
@@ -51,7 +52,6 @@ watch(() => topics.type ,()=>{
 }, {immediate: true})
 
 function getTopicList() {
-  console.log(topics.page)
   if(topics.end) return
   get(`api/forum/list-topic?page=${topics.page}&type=${topics.type}`, (data) => {
     if (data) {
@@ -71,6 +71,13 @@ function resetList() {
   getTopicList()
 }
 
+function clickTopic(id, ban) {
+  if(ban) {
+    ElMessageBox.alert('该主题已被封禁', '提示')
+  } else {
+    router.push('/index/topic-detail/' + id)
+  }
+}
 
 get('api/forum/top-topic', data => topics.top = data)
 navigator.geolocation.getCurrentPosition(position => {
@@ -84,12 +91,13 @@ navigator.geolocation.getCurrentPosition(position => {
   console.log(error)
   ElMessage.warning("位置信息获取超时，请检查网络设置")
 }, {
-  timeout: 5000,
+  timeout: 10000,
   enableHighAccuracy: true
 })
 get('api/forum/ip',(data)=> {
   ip.value = data
 })
+get('api/forum/announcements', data => store.forum.announcements = data)
 </script>
 
 <template>
@@ -109,7 +117,7 @@ get('api/forum/ip',(data)=> {
         </div>
       </lite-card>
       <lite-card style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px">
-        <div v-for="item in topics.top" class="top-topic" @click="router.push('/index/topic-detail/' + item.id)">
+        <div v-for="item in topics.top" class="top-topic" @click="clickTopic(item.id, item.ban)">
           <el-tag type="info" size="small">置顶</el-tag>
           <div>{{item.title}}</div>
           <div>{{new Date(item.time).toLocaleString()}}</div>
@@ -127,7 +135,7 @@ get('api/forum/ip',(data)=> {
         <div v-if="topics.list?.length">
           <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px" v-infinite-scroll="getTopicList">
             <!-- 主题列表 -->
-            <lite-card  v-for="item in topics.list" @click="router.push('/index/topic-detail/' + item.id)" class="topic-card">
+            <lite-card  v-for="item in topics.list" @click="clickTopic(item.id, item.ban)" class="topic-card">
               <div style="display: flex">
                 <div>
                   <el-avatar :size="30" :src="store.avatarUserUrl(item.avatar)"></el-avatar>
@@ -150,12 +158,17 @@ get('api/forum/ip',(data)=> {
               <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 10px">
                 <el-image class="topic-image" v-for="image in item.images" :src="image"  fit="cover"></el-image>
               </div>
-              <div style="display: flex; gap: 10px; font-size: 13px; margin-top: 10px">
-                <div style="opacity: 0.8">
-                  <el-icon style="vertical-align: middle; translate: 0 -2px"><CircleCheck/></el-icon> {{item.like}}点赞
+              <div style="display: flex; ">
+                <div style="display: flex; font-size: 13px; margin-top: 10px; gap: 10px">
+                  <div style="opacity: 0.8">
+                    <el-icon style="vertical-align: middle; translate: 0 -2px"><CircleCheck/></el-icon> {{item.like}}点赞
+                  </div>
+                  <div style="opacity: 0.8">
+                    <el-icon style="vertical-align: middle; translate: 0 -2px"><Star/></el-icon> {{item.collect}}收藏
+                  </div>
                 </div>
-                <div style="opacity: 0.8">
-                  <el-icon style="vertical-align: middle; translate: 0 -2px"><Star/></el-icon> {{item.collect}}收藏
+                <div style="flex: 1;justify-content: flex-end; display: flex">
+                  <el-tag v-if="item.ban" type="danger" size="large">封禁</el-tag>
                 </div>
               </div>
             </lite-card >
@@ -167,25 +180,33 @@ get('api/forum/ip',(data)=> {
       <div style="position: sticky;top: 20px">
         <lite-card style="margin-bottom: 10px">
           <div class="collect-list-button" @click="collectShow = true">
-            <span><el-icon style="translate: 0 2px"><FolderOpened/></el-icon>查看我的收藏</span>
+            <span><el-icon style="translate: 0 2px" size="18px"><FolderOpened/></el-icon>查看我的收藏</span>
             <el-icon style="translate: 0 2px"><ArrowRightBold/></el-icon>
           </div>
         </lite-card>
         <lite-card>
           <div style="font-weight: bold">
-            <el-icon style="translate: 0 2px"> <CollectionTag/></el-icon>
-            论坛公告
+            <el-tag style="font-size: 15px">
+              <el-icon style="translate: 0 3px" size="18px"> <CollectionTag/></el-icon>
+              论坛公告</el-tag>
           </div>
           <el-divider style="margin: 10px 0"> </el-divider>
           <div style="font-size: 14px; margin: 10px; color: grey">
-            神经语言模型使用分布式表示（也称为嵌入）来表示词汇。这些嵌入是低维空间的连续向量，
-            能够捕获词汇的语义和语法特征。通过训练，相似的词汇在嵌入空间中会有接近的位置。
+            <el-carousel height="150px" style="border-radius: 5px" indicator-position="outside">
+              <el-carousel-item v-for="item in store.forum.announcements"
+                                style="display: flex;flex-direction: column; justify-content: space-between">
+                <el-tag type="success" effect="light" style="font-size: 15px">{{item.title}}</el-tag>
+                <el-text size="large" tag="b" style="text-align: center">{{item.content}}</el-text>
+                <el-tag effect="plain" style="font-size: 13px;">{{new Date(item.time).toLocaleString()}}</el-tag>
+              </el-carousel-item>
+            </el-carousel>
           </div>
         </lite-card>
         <lite-card style="margin-top: 10px">
           <div style="font-weight: bold">
-            <el-icon style="translate: 0 2px"><Calendar/></el-icon>
-            天气信息
+
+            <el-tag style="font-size: 15px" type="warning">
+              <el-icon style="translate: 0 3px" size="18px"><Calendar/></el-icon>天气信息</el-tag>
           </div>
           <el-divider style="margin: 10px 0"></el-divider>
           <div>

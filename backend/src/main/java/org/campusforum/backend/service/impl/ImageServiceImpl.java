@@ -59,7 +59,11 @@ public class ImageServiceImpl extends ServiceImpl<ImageStoreMapper, ImageStore> 
                 .build();
         try {
             minioClient.putObject(args);
-            if (this.save(new ImageStore(id, imageName, date))) {
+            ImageStore imageStore = new ImageStore();
+            imageStore.setName(imageName);
+            imageStore.setUid(id);
+            imageStore.setTime(date);
+            if (this.save(imageStore)) {
                 return imageName;
             } else {
                 return null;
@@ -118,5 +122,16 @@ public class ImageServiceImpl extends ServiceImpl<ImageStoreMapper, ImageStore> 
         GetObjectArgs args = GetObjectArgs.builder().bucket(bucket).object(image).build();
         GetObjectResponse response = minioClient.getObject(args);
         IOUtils.copy(response, stream);
+    }
+
+    @Override
+    public void deleteCache(String name) throws Exception{
+        //获取得到对于minio的名称
+        String key = name.substring(name.indexOf("/cache"));
+        //查询数据库并进行删除
+        if (this.remove(Wrappers.<ImageStore>query().eq("name", key))) {
+            RemoveObjectArgs removeObjectArgs = RemoveObjectArgs.builder().bucket(bucket).object(key).build();
+            minioClient.removeObject(removeObjectArgs);
+        }
     }
 }

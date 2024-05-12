@@ -12,13 +12,13 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 public class Interact {
-    private Integer tid;
+    private Integer targetId;
     private Integer uid;
     private String type;
     private Date time;
 
     public String takeKey() {
-        return this.tid + ":" + this.uid;
+        return this.targetId + ":" + this.uid;
     }
 
     public static Interact parseInteract(String key, String type) {

@@ -1,5 +1,5 @@
 import axios from "axios";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import {router} from "@/router/index.js";
 
 const defaultError = (error)=>{
@@ -108,10 +108,14 @@ function login(username, password, remember, success, failure = defaultFailure){
         password: password,
         remember: remember,
     },{"Content-type":"application/x-www-form-urlencoded"}, (data)=>{
-        storeAccessToken(data.token, remember, data.expire)
-        ElMessage.success(`登陆成功, 欢迎 ${data.username}`)
-        // success(data)
-        router.push("/index")
+        //判断是否为封禁的账户
+        if (!data.ban) {
+            storeAccessToken(data.token, remember, data.expire)
+            ElMessage.success(`登陆成功, 欢迎 ${data.username}`)
+            router.push("/index")
+        } else {
+            ElMessageBox.alert('账户已被封禁，请联系管理员','提示',{type: "error"})
+        }
     }, failure)
 }
 

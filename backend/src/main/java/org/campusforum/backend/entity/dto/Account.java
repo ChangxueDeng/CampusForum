@@ -35,4 +35,6 @@ public class Account {
     private Date registerTime;
     @TableField
     private String avatar;
+    @TableField
+    private boolean ban;
 }

@@ -12,8 +12,22 @@ export const useStore = defineStore('general', {
                 avatar: '',
             },
             forum:{
-                types: []
+                types: [],
+                announcements:[]
             },
+            admin:{
+                topicCount: 0,
+                topicCountByType: [],
+                userCount: 0,
+                commentCount: 0,
+                notificationCount: 0,
+                announcementCount: 0,
+                announcement: null,
+            },
+            page:{
+                forum: 1,
+                admin: 'overview',
+            }
         }
     },
     getters: {
@@ -39,6 +53,12 @@ export const useStore = defineStore('general', {
             } else {
                 return "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
             }
+        },
+        forumActivate(page) {
+            this.page.forum = page
+        },
+        adminActivate(page) {
+            this.page.admin = page
         }
     }
 

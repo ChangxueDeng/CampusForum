@@ -10,7 +10,7 @@ import {ElMessage} from "element-plus";
 
 const store = useStore()
 const registerTime = computed(()=> new Date(store.user.registerTime).toLocaleDateString())
-
+store.forumActivate(3)
 const baseFormRef = ref()
 const emailFormRef = ref()
 const desc = ref()

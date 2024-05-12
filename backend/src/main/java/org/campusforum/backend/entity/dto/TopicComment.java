@@ -27,5 +27,7 @@ public class TopicComment {
     private Date time;
     @TableField
     private Integer quote;
+    @TableField
+    private boolean ban;
 
 }
