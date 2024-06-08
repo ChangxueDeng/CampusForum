@@ -227,7 +227,4 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     private String getEmailVerify(String key) {
         return stringRedisTemplate.opsForValue().get(key);
     }
-
-
-
 }

@@ -10,7 +10,7 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css';
 const app = createApp(App)
 const pinia = createPinia()
 //axios.defaults.baseURL = 'http://localhost:8081'
-axios.defaults.baseURL = 'http://47.113.144.109:8081'
+axios.defaults.baseURL = 'https://dengchangxue.top:8081'
 app.use(pinia)
 app.use(router)
 app.mount('#app')

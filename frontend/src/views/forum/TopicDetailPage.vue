@@ -182,7 +182,7 @@ function deleteTopic() {
         <div style="text-align: left; margin: 0 5px;">
           <div class="desc">手机号: {{topic.data.user.phone || '已隐藏或未填写' }}</div>
           <div class="desc">QQ号: {{topic.data.user.qq||'已隐藏或未填写'}}</div>
-          <div class="desc">微信号: {{topic.data.user.wx || '已隐藏或未填写'}}}</div>
+          <div class="desc">微信号: {{topic.data.user.wx || '已隐藏或未填写'}}</div>
         </div>
         <el-divider style="margin: 10px 0"></el-divider>
         <div class="desc">{{topic.data.user.desc || '已隐藏或未填写'}}</div>

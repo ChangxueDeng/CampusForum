@@ -52,7 +52,7 @@ function userLogin(){
     <div>
       <div style="text-align: center">
         <h2 style="margin-top: 220px">登陆</h2>
-        <el-text size="large">欢迎进行系统，请输入用户名和密码进行登陆</el-text>
+        <el-text size="large">欢迎进入论坛，请输入用户名和密码进行登陆</el-text>
       </div>
     </div>
     <div style="margin-top: 20px">

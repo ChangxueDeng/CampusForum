@@ -33,5 +33,4 @@ public class GlobalExceptionHandler {
         log.warn("Resolved [{}:{}]", exception.getClass().getName(), exception.getMessage());
         return Result.failure(StatusUtils.STATUS_NOT_FOUND, "资源未找到").toJsonString();
     }
-
 }

@@ -356,7 +356,7 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         } else if (vo.getQuote() > 0) {
             if (!topicCommentMapper.exists(Wrappers.<TopicComment>query().eq("id", vo.getQuote()))) {
                 return "评论已被删除，无法发表评论";
-            } else if (!topicCommentMapper.exists(Wrappers.<TopicComment>query().eq("id", vo.getTid()).eq("tid", vo.getTid()))) {
+            } else if (!topicCommentMapper.exists(Wrappers.<TopicComment>query().eq("id", vo.getQuote()).eq("tid", vo.getTid()))) {
                 return "不存在这条评论";
             } else if (topicCommentMapper.selectById(vo.getQuote()).isBan()) {
                 return "评论已被封禁，无法发表评论";
