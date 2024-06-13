@@ -111,8 +111,8 @@ function deleteComment(cid) {
 }
 function following(targetId, state, finish) {
   get(`api/forum/follow-user?targetId=${targetId}&state=${state}`,()=> {
-    ElMessage.success(state ? '关注成功' : '取消关注成功')
     finish()
+    ElMessage.success(state ? '关注成功' : '取消关注成功')
     updateCommentFollow(targetId)
   })
 }

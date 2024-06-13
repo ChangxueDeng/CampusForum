@@ -141,7 +141,7 @@ store.forumActivate(2)
                 <el-tooltip :content="space.followed ? '取消关注' : '关注'">
                   <el-button :icon="Select" v-if="!space.followed" circle type="primary" plain
                              @click="following(Number.parseInt(route?.params.id), !space.followed)"></el-button>
-                  <el-button :icon="CloseBold" v-else circle type="danger" plain @click="following(space.id, !space.followed)"></el-button>
+                  <el-button :icon="CloseBold" v-else circle type="danger" plain @click="following(id, !space.followed)"></el-button>
                 </el-tooltip>
               </div>
               <el-button @click="router.push('/index/user-setting')" type="warning" style="width: 100%;" v-if="store.user.id === Number.parseInt(route?.params.id)">编辑资料</el-button>

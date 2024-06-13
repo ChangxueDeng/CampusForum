@@ -337,8 +337,19 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         return null;
     }
 
+    /**
+     * 存储互动操作的定时任务状态
+     */
     private final Map<String, Boolean> scheduleState = new HashMap<>();
+    /**
+     * 创建三个线程来完成互动操作的定时任务
+     */
     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(3);
+
+    /**
+     * 保存互动操作的定时任务
+     * @param type 互动类型
+     */
     private void saveInteractSchedule(String type) {
         if (!scheduleState.getOrDefault(type, false)) {
             scheduleState.put(type, true);
@@ -348,6 +359,11 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
             }, 3, TimeUnit.SECONDS);
         }
     }
+
+    /**
+     * 入库操作
+     * @param type 互动类型
+     */
     private void saveInteract(String type) {
         synchronized (type.intern()) {
             LinkedList<Interact> check = new LinkedList<>();
@@ -361,20 +377,16 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
                 if ("like".equals(type) || "collect".equals(type))
                 {
                     if (!check.isEmpty()) {
-                        log.error("保存like");
                         baseMapper.addInteract(check, type);
                     }
                     if (!uncheck.isEmpty()) {
-                        log.error("删除like");
                         baseMapper.deleteInteract(uncheck, type);
                     }
                 }else if ("follow".equals(type)) {
                     if (!check.isEmpty()) {
-                        log.error("保存follow");
                         accountFollowsMapper.addFollows(check, type);
                     }
                     if (!uncheck.isEmpty()) {
-                        log.error("删除follow");
                         accountFollowsMapper.deleteFollows(uncheck, type);
                     }
                 }

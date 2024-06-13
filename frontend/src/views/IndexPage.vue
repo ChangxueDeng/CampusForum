@@ -124,7 +124,7 @@ getNotification()
         </div>
       </el-header>
       <el-container>
-        <el-aside width="150px">
+        <el-aside width="150px" class="aside">
           <el-scrollbar style="height: calc(100vh - 55px);">
             <div style="display: flex; flex-direction: column; justify-content: center;
                   min-height: calc(100vh - 55px);">
@@ -260,6 +260,15 @@ getNotification()
 }
 .dark .main-content-page{
   background-color: #242628;
+
+}
+.dark .aside{
+  background-color: #242628;
+
+}
+
+.aside{
+  background-color: #f7f8fa;;
 }
 .main-content-page{
   padding: 0;
