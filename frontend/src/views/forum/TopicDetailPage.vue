@@ -3,7 +3,7 @@ import {useRoute} from "vue-router";
 import {get, post} from "@/net/net.js"
 import {reactive, ref} from "vue";
 import {
-  ArrowLeft,
+  ArrowLeft, ChatLineRound,
   ChatSquare,
   CircleCheck, CloseBold,
   Delete,
@@ -23,6 +23,7 @@ import {ElMessage} from "element-plus";
 import {useStore} from "@/store/index.js";
 import TopicEditor from "@/components/TopicEditor.vue";
 import TopicCommentEditor from "@/components/TopicCommentEditor.vue";
+import LiteCard from "@/components/LiteCard.vue";
 
 const route = useRoute()
 const editorShow = ref(false)
@@ -188,6 +189,11 @@ function deleteTopic() {
         <div class="desc">{{topic.data.user.desc || '已隐藏或未填写'}}</div>
       </div>
       <div class="topic-main-right">
+        <card  v-if="topic.data.contentAbstract.length > 10">
+          <div style="text-align: center; "><el-icon :size="36"><ChatLineRound/></el-icon></div>
+          <el-divider style="margin: 2px;"></el-divider>
+          <card><span style="font-size: 20px;font-weight: bold">Ai摘要：</span>{{topic.data.contentAbstract}}</card>
+        </card>
         <div class="topic-content" v-html="convert2Html(topic.data.content)"></div>
         <el-divider></el-divider>
         <div>

@@ -59,9 +59,6 @@ function reset(text, type){
   created(text, type)
 }
 
-if (route.query.text && route.query.type) {
-  created(route.query.text, route.query.type)
-}
 
 watch(
     () => route.query,

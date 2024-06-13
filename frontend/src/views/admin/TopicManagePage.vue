@@ -73,6 +73,7 @@ getTopics(1)
               <el-table-column label="Id" prop="id"/>
               <el-table-column label="标题" prop="title"/>
               <el-table-column label="内容" prop="content" show-overflow-tooltip/>
+              <el-table-column label="摘要" prop="contentAbstract" show-overflow-tooltip/>
               <el-table-column label="发布者" prop="uid"/>
               <el-table-column label="类型" prop="type"/>
               <el-table-column label="发布时间" prop="time"/>

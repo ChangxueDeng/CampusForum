@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.campusforum.backend.entity.dto.*;
@@ -17,7 +16,6 @@ import org.campusforum.backend.entity.vo.request.UpdateTopicVO;
 import org.campusforum.backend.entity.vo.response.*;
 import org.campusforum.backend.exception.ResourceNotFoundException;
 import org.campusforum.backend.mapper.*;
-import org.campusforum.backend.service.AccountFollowsService;
 import org.campusforum.backend.service.ImageService;
 import org.campusforum.backend.service.NotificationService;
 import org.campusforum.backend.service.TopicService;
@@ -25,10 +23,10 @@ import org.campusforum.backend.utils.CacheUtils;
 import org.campusforum.backend.utils.Const;
 import org.campusforum.backend.utils.FlowUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -63,7 +61,12 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
     private StringRedisTemplate stringRedisTemplate;
     @Resource
     private ImageService imageService;
-
+    @Value("${llm.appKey}")
+    private String appKey;
+    @Value("${llm.secretKey}")
+    private String secretKey;
+    @Resource
+    private RestTemplate restTemplate;
     private static final int TOPIC_CONTENT_MAX = 20000;
     private static final int TOPIC_COMMENT_MAX = 2000;
     @Override
@@ -83,6 +86,14 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         Topic topic = new Topic();
         BeanUtils.copyProperties(vo, topic);
         topic.setContent(vo.getContent().toJSONString());
+        //获取摘要
+        String token = getAccessToken();
+        if (token != null) {
+            String result = getAbstract(getAllContent(vo.getContent().toJSONString()), token);
+            if (result != null) {
+                topic.setContentAbstract(result);
+            }
+        }
         topic.setUid(uid);
         topic.setTime(new Date());
         if (this.save(topic)) {
@@ -95,6 +106,62 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         }
     }
 
+    /**
+     * 从delta格式的文本获取所有文本
+     * @param content 帖子内容
+     * @return {@link String }
+     */
+    private String getAllContent(String content){
+        StringBuilder text = new StringBuilder();
+        JSONArray ops = JSONObject.parseObject(content).getJSONArray("ops");
+        for (Object o : ops) {
+            Object insert = JSONObject.from(o).get("insert");
+            if (insert instanceof String t) {
+                text.append(t);
+            }
+        }
+        return text.toString();
+    }
+
+    /**
+     * 获取百度大模型的token
+     * @return {@link String }
+     */
+    private String getAccessToken(){
+        String url = "https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id="+ appKey + "&client_secret=" + secretKey;
+        JSONObject jsonObject = restTemplate.getForObject(url,JSONObject.class);
+        if (jsonObject != null) {
+            return jsonObject.getString("access_token");
+        }
+        return null;
+    }
+
+    /**
+     * 通过百度大模型获取摘要
+     * @param text 帖子内容
+     * @param token 请求授权码
+     * @return {@link String }
+     */
+    private String getAbstract(String text, String token){
+        if (text.length() < 50) {
+            return " ";
+        }
+        String url = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-lite-8k?access_token="+token;
+        String tag = "对下面的内容生成50字以内合乎汉语语法的摘要";
+        JSONObject jsonObject = new JSONObject();
+        JSONArray messages = new JSONArray();
+        JSONObject body = new JSONObject();
+        body.put("role","user");
+        body.put("content",text + tag);
+        messages.add(body);
+        jsonObject.put("messages",messages);
+        JSONObject result = restTemplate.postForObject(url, jsonObject, JSONObject.class);
+        if (result != null) {
+            return result.getString("result");
+        } else {
+            return null;
+        }
+    }
     @Override
     public String updateTopic(UpdateTopicVO vo, int uid) {
         if (contentLimit(vo.getContent(), TOPIC_CONTENT_MAX)) {
@@ -102,12 +169,21 @@ public class TopicServiceImpl extends ServiceImpl<TopicMapper, Topic> implements
         } else if (!types().contains(vo.getType())){
             return "主题类型非法";
         }
+        String token = getAccessToken();
+        String newAbstracts = " ";
+        if (token != null) {
+            String result = getAbstract(getAllContent(vo.getContent().toJSONString()), token);
+            if (result != null) {
+                newAbstracts = result;
+            }
+        }
         baseMapper.update(null, new UpdateWrapper<Topic>()
                 .eq("id", vo.getId())
                 .eq("uid", uid)
                 .set("title", vo.getTitle())
                 .set("type", vo.getType())
-                .set("content", vo.getContent().toJSONString()));
+                .set("content", vo.getContent().toJSONString())
+                .set("content_abstract", newAbstracts));
         return null;
     }
 

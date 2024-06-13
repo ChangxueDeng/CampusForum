@@ -5,6 +5,10 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * 帖子详请
+ * @author ChangxueDeng
+ */
 @Data
 public class TopicDetailVo {
     private Integer id;
@@ -17,6 +21,7 @@ public class TopicDetailVo {
     Long commentCount;
     private Boolean ban;
     private Boolean followed;
+    private String contentAbstract;
     @Data
     public static class User {
         Integer id;

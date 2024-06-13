@@ -35,4 +35,6 @@ public class Topic {
     private boolean ban;
     @TableField
     private boolean top;
+    @TableField
+    private String contentAbstract;
 }

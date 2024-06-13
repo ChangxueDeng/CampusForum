@@ -1,0 +1,59 @@
+server:
+  port: 8081
+#  ssl:
+#    key-store:
+#    key-store-password:
+#    key-store-type:
+#mybatis-plus:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+springdoc:
+  swagger-ui:
+    url: /v3/api-docs
+minio:
+  endpoint: "http://192.168.56.101:9001"
+  accessKey: "minio"
+  secretKey: "password"
+  bucket: "campusforum"
+weather:
+  # 你的和风天气key
+  apikey: //
+llm:
+  #你的百度语言模型key
+  appKey: //
+  secretKey: //
+spring:
+  security:
+    filter:
+      order: -100
+    jwt:
+      key: "2024"
+      expire: 1
+    cors:
+      allowed-origins: "http://localhost:8080"
+  datasource:
+    url: jdbc:mysql://192.168.56.101:3306/campus_forum
+    username: root
+    password: 123456
+  data:
+    redis:
+      host: 192.168.56.101
+      port: 6379
+      database: 0
+  mail:
+    # 163邮箱的地址为smtp.163.com，直接填写即可
+    host: smtp.163.com
+    # 你申请的163邮箱
+    username: //
+    # 注意密码是在开启smtp/pop3时自动生成的，记得保存一下，不然就找不到了
+    password: //
+    port: 25
+  rabbitmq:
+    port: 5672
+    host: 192.168.56.101
+    virtual-host: /campus
+    username: admin
+    password: admin
+  servlet:
+    multipart:
+      max-file-size: 5MB

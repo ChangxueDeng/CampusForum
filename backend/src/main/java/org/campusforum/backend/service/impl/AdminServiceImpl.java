@@ -14,6 +14,7 @@ import org.campusforum.backend.entity.vo.response.*;
 import org.campusforum.backend.mapper.*;
 import org.campusforum.backend.service.AdminService;
 import org.campusforum.backend.service.ImageService;
+import org.campusforum.backend.service.TopicService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,7 +43,7 @@ public class AdminServiceImpl implements AdminService {
     private AnnouncementMapper announcementMapper;
     @Resource
     PasswordEncoder passwordEncoder;
-    @Autowired
+    @Resource
     private AccountPrivacyMapper accountPrivacyMapper;
     @Resource
     private ImageService imageService;
@@ -229,5 +230,6 @@ public class AdminServiceImpl implements AdminService {
     public void topTopic(int id, boolean top) {
         topicMapper.update(null, Wrappers.<Topic>update().eq("id", id).set("top", !top));
     }
+
 }
 

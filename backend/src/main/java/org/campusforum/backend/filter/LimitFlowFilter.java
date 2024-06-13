@@ -3,6 +3,7 @@ package org.campusforum.backend.filter;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.campusforum.backend.utils.Const;
@@ -24,16 +25,16 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @Order(Const.ORDER_FILTER_LIMIT)
-public class LimitFlowFilter extends OncePerRequestFilter {
+public class LimitFlowFilter extends HttpFilter {
     @Resource
     StringRedisTemplate stringRedisTemplate;
     @Resource
     FlowUtils flowUtils;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (!tryCount(request.getRemoteAddr())) {
-            filterChain.doFilter(request, response);
+            chain.doFilter(request, response);
         } else {
             blackWriter(response);
         }

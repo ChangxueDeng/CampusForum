@@ -26,13 +26,6 @@ public class AdminController {
     AdminService adminService;
     @Resource
     ControllerUtils controllerUtils;
-    /*
-    1. 发布论坛公告
-    2. 查看所有用户
-    3. 查看所有帖子
-    4. 封禁或删除帖子
-    5. 封禁或删除用户
-     */
 
     @GetMapping("/all-user")
     public Result<List<AccountListVO>> allUser(@RequestParam("page") int page) {
