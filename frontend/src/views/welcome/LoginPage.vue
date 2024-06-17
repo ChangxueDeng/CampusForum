@@ -17,6 +17,10 @@ const rule = {
   password: {required: true, message: '请输入密码', trigger: ['blur', 'change']}
 }
 
+function testAccount(){
+  form.username = "test"
+  form.password = "12345678"
+}
 // const login = ()=>{
 //   if(!form.username || !form.password){
 //    ElMessage.warning("请填写用户名和密码")
@@ -81,6 +85,9 @@ function userLogin(){
         <el-text style="font-size: 14px">没有账户,</el-text>
         <el-link @click="router.push('/register')" style="margin-top: -3px; font-size: 15px" :icon="Link">进行注册</el-link>
       </el-divider>
+    </div>
+    <div style="text-align: center">
+      <el-button @click="testAccount">使用测试账号</el-button>
     </div>
   </div>
 
