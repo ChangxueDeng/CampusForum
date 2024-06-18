@@ -83,7 +83,8 @@ watch(
         <div v-if="topics.loading">
           <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px" v-infinite-scroll="getSearchTopics">
             <!-- 主题列表 -->
-            <lite-card  v-for="item in topics.list" @click="clickTopic(item.id, item.ban)" class="topic-card">
+            <lite-card  v-for="item in topics.list" @click="clickTopic(item.id, item.ban)" class="topic-card"
+                        :style="{'border-bottom' : `3px solid ${store.findTyById(item.type)?.color + 'EE'}`}">
               <div style="display: flex">
                 <div>
                   <el-avatar :size="30" :src="store.avatarUserUrl(item.avatar)"></el-avatar>

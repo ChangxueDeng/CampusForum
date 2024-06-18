@@ -1,8 +1,7 @@
 <script setup>
 
 import LiteCard from "@/components/LiteCard.vue";
-import {
-  ArrowRight, ArrowRightBold,
+import {ArrowRightBold,
   Calendar, CircleCheck,
   Clock,
   CollectionTag,
@@ -25,6 +24,11 @@ import ColorDot from "@/components/ColorDot.vue";
 import {router} from "@/router/index.js";
 import TopicTag from "@/components/TopicTag.vue";
 import TopicCollectList from "@/components/TopicCollectList.vue";
+import spring from "@/assets/spring.png"
+import quillP from "@/assets/quill.png"
+import minio from "@/assets/minio.png"
+import vueP from "@/assets/vue.png"
+
 
 const today = computed(()=> {
   const date = new Date()
@@ -135,7 +139,8 @@ get('api/forum/announcements', data => store.forum.announcements = data)
         <div v-if="topics.list?.length">
           <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px" v-infinite-scroll="getTopicList">
             <!-- 主题列表 -->
-            <lite-card  v-for="item in topics.list" @click="clickTopic(item.id, item.ban)" class="topic-card">
+            <lite-card  v-for="item in topics.list" @click="clickTopic(item.id, item.ban)" class="topic-card"
+              :style="{'border-bottom' : `3px solid ${store.findTyById(item.type)?.color + 'EE'}`}">
               <div style="display: flex">
                 <div>
                   <el-avatar :size="30" :src="store.avatarUserUrl(item.avatar)"></el-avatar>
@@ -231,13 +236,24 @@ get('api/forum/announcements', data => store.forum.announcements = data)
         </div>
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); grid-gap: 10px; margin-top: 10px">
           <div class="friend-link">
-            <el-image src="https://element-plus.org/images/js-design-banner.jpg"></el-image>
+            <el-link href="https://spring.io/" target="_blank">
+              <el-image :src="spring"></el-image>
+            </el-link>
           </div>
           <div class="friend-link">
-            <el-image src="https://element-plus.org/images/sponsors/vform-banner.png"></el-image>
+            <el-link href="https://min.io/" target="_blank">
+              <el-image :src="minio"></el-image>
+            </el-link>
           </div>
           <div class="friend-link">
-            <el-image src="https://element-plus.org/images/sponsors/jnpfsoft.jpg"/>
+            <el-link href="https://cn.vuejs.org/" target="_blank">
+              <el-image :src="vueP"/>
+            </el-link>
+          </div>
+          <div class="friend-link">
+            <el-link href="https://quilljs.com/" target="_blank">
+              <el-image :src="quillP"/>
+            </el-link>
           </div>
         </div>
       </div>
@@ -251,6 +267,9 @@ get('api/forum/announcements', data => store.forum.announcements = data)
 
 <style lang="less" scoped>
 .friend-link{
+  width: 150px;
+  max-height: 50px;
+
   border-radius: 5px;
   overflow: hidden;
 }
@@ -314,7 +333,6 @@ get('api/forum/announcements', data => store.forum.announcements = data)
   padding: 10px;
 
   transition: scale .3s;
-
   &:hover{
     scale: 1.015;
     cursor: pointer;

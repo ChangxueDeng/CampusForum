@@ -175,7 +175,9 @@ store.forumActivate(2)
       <transition name="el-fade-in" mode="out-in">
         <div>
           <div v-infinite-scroll="getSpaceTopics">
-            <lite-card v-for="item in topics.list" class="topic-card" style="margin-top: 10px" @click="clickTopic(item.id, item.ban)">
+            <lite-card v-for="item in topics.list" class="topic-card" style="margin-top: 10px"
+                       @click="clickTopic(item.id, item.ban)"
+                       :style="{'border-bottom' : `3px solid ${store.findTyById(item.type)?.color + 'EE'}`}">
               <div style="display: flex">
                 <div style="margin-left: 7px">
                   <div style="font-size: 12px; color: grey">
